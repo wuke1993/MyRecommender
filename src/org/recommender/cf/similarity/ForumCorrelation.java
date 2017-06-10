@@ -1,11 +1,12 @@
 package org.recommender.cf.similarity;
 /**
 * @author : wuke
-* @date   : 20170608 17:20:53
+* @date   : 20170611 01:00:14
 * Title   : ForumCorrelation
 * Description : 
 */
-public class ForumCorrelation {
-	
+public interface ForumCorrelation {
+
+	double calForumCorrelation(int stuno_sequence_x, int stuno_sequence_y);
 	
 }
