@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
+import org.recommender.utility.GetProperty;
 import org.recommender.utility.StoreStringIntoFile;
 
 /**
@@ -21,13 +22,14 @@ public class CalPreference {
 
 		CalPreference calculator= new CalPreference();
 		
-		double coefficient_times = 1;
-		double coefficient_drag = 0.5;
-		double coefficient_duration = 1;
-		String path1 = "E:\\data\\DLC_forum\\recommender\\cf_preferenceTimes.txt";
-		String path2 = "E:\\data\\DLC_forum\\recommender\\cf_preferenceDrag.txt";
-		String path3 = "E:\\data\\DLC_forum\\recommender\\cf_preferenceDuration.txt";
-		String path4 = "E:\\data\\DLC_forum\\recommender\\cf_preference.txt";
+		double coefficient_times = Double.parseDouble(GetProperty.getPropertyByName("WEIGHT_TIMES"));
+		double coefficient_drag = Double.parseDouble(GetProperty.getPropertyByName("WEIGHT_DRAG"));
+		double coefficient_duration = Double.parseDouble(GetProperty.getPropertyByName("WEIGHT_DURATION"));
+		
+		String path1 = GetProperty.getPropertyByName("PREFERENCE_TIMES_PATH");
+		String path2 = GetProperty.getPropertyByName("PREFERENCE_DRAG_PATH");
+		String path3 = GetProperty.getPropertyByName("PREFERENCE_DURATION_PATH");
+		String path4 = GetProperty.getPropertyByName("PREFERENCE_PATH");
 		calculator.calPreference(coefficient_times, coefficient_drag, coefficient_duration, path1, path2, path3, path4);
 	}
 
@@ -137,19 +139,22 @@ public class CalPreference {
 		
 		StringBuilder preferenceSb = new StringBuilder();
 		
+		int stuno_sequence = 0;
 		long stuno = 0;
 		int video_sequence = 0;
 		double preference = 0;
 		
 		for(Entry<Long, HashMap<Integer, Double>> entry : stuno_video_preference.entrySet()) {
+			stuno_sequence += 1;
 			stuno = entry.getKey();
 			HashMap<Integer, Double> video_preference = entry.getValue();
 			
-			for(Entry<Integer, Double> entry2 : video_preference.entrySet()) {
+			for(Entry<Integer, Double> entry2 : video_preference.entrySet()) {				
 				video_sequence = entry2.getKey();
 				preference = entry2.getValue();
 				
-				preferenceSb.append(stuno);
+				preferenceSb.append(stuno_sequence);
+				preferenceSb.append("," + stuno);
 				preferenceSb.append("," + video_sequence);
 				preferenceSb.append("," + preference);
 				preferenceSb.append("\n");

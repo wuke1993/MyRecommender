@@ -23,14 +23,16 @@ public class PreferenceTimes implements Preference {
 
 		Connection conn = MySqlConn.getConn();
 		String tableName = "my_maozedong_sequence";
-		String sql = "SELECT stuno, tlen, title, sequence FROM " + tableName;
+		// String sql = "SELECT stuno, tlen, title, sequence FROM " + tableName;
+		String sql = "SELECT stuno, tlen, title, sequence FROM " + tableName 
+				+ " WHERE rtime BETWEEN \"2015-02-01 00:00:00\" AND \"2015-07-31 23:59:59\""; // We got 3766 students!
 		String path1 = "E:\\data\\DLC_forum\\recommender\\cf_preferenceTimes_detail.txt";
 		String path2 = "E:\\data\\DLC_forum\\recommender\\cf_preferenceTimes.txt";
 		
 		PreferenceTimes preferenceTimes = new PreferenceTimes();
 		preferenceTimes.calPreference(conn, sql, path1, path2);
 	}
-
+	
 	@Override
 	public void calPreference(Connection conn, String sql, String path1, String path2) {
 		Map<Long, HashMap<Integer, Integer>> stuno_video_times = new HashMap<Long, HashMap<Integer, Integer>>();
@@ -100,6 +102,9 @@ public class PreferenceTimes implements Preference {
 				e.printStackTrace();
 			}
 		}
+		
+		// print number of students
+		System.out.println("We got " + stuno_video_times.size() + " students!");
 		
 		// store the result
 		this.storePreferenceTimes(stuno_video_times, stuno_videos_times_sum, stuno_videos_num, path1, path2);

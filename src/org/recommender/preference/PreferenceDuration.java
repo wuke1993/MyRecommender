@@ -22,7 +22,9 @@ public class PreferenceDuration implements Preference {
 
 		Connection conn = MySqlConn.getConn();
 		String tableName = "my_maozedong_sequence";
-		String sql = "SELECT stuno, tlen, title, sequence FROM " + tableName;
+		// String sql = "SELECT stuno, tlen, title, sequence FROM " + tableName;
+		String sql = "SELECT stuno, tlen, title, sequence FROM " + tableName
+				+ " WHERE rtime BETWEEN \"2015-02-01 00:00:00\" AND \"2015-07-31 23:59:59\""; // We got 3766 students!
 		String path1 = "E:\\data\\DLC_forum\\recommender\\cf_preferenceDuration_detail.txt";
 		String path2 = "E:\\data\\DLC_forum\\recommender\\cf_preferenceDuration.txt";
 		
@@ -38,13 +40,13 @@ public class PreferenceDuration implements Preference {
         ResultSet rs = MySqlConn.getResultSet(conn, sql);
 		long stuno = 0;
 		int tlen = 0;
-		String title = "";
+		// String title = "";
 		String sequence = "";
 		try {
 			while(rs.next()) {
 				stuno = rs.getLong(1);
 				tlen = rs.getInt(2);
-				title = rs.getString(3);
+				// title = rs.getString(3);
 				sequence = rs.getString(4);
 
 				int video_sequence = Integer.parseInt(sequence.split("\\.")[0]);
@@ -75,6 +77,9 @@ public class PreferenceDuration implements Preference {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+		
+		// print number of students
+		System.out.println("We got " + stuno_video_times.size() + " students!");
 		
 		String sql2 = "SELECT dur, urlppt FROM my_maozedong_kj_courseitems";
 		Map<Integer, Integer> videos_dur = PreferenceDuration.getVideosDur(conn, sql2);
