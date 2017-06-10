@@ -10,7 +10,7 @@ import org.recommender.utility.GetProperty;
 * @author : wuke
 * @date   : 20170611 00:38:27
 * Title   : CalSimilarityMatrix
-* Description : 
+* Description : Calculate similarity matrix by calling CalTwoUsersSimilarity.calTwoUsersSimilarity().
 */
 public class CalSimilarityMatrix {
 
@@ -103,9 +103,10 @@ public class CalSimilarityMatrix {
 		try {
 			fw = new FileWriter(file, true); // true, append content
 			
-			StringBuilder similarityMatrixSb = new StringBuilder();
+			StringBuilder similarityMatrixSb = null;
 			
 			for(int i = 0; i < similarityMatrix.length; i++) {
+				similarityMatrixSb = new StringBuilder();
 				for(int j = 0; j < (similarityMatrix[i].length - 1); j++) {
 					similarityMatrixSb.append(similarityMatrix[i][j]);
 					similarityMatrixSb.append(",");
@@ -123,3 +124,12 @@ public class CalSimilarityMatrix {
 	}
 	
 }
+/**
+****** Successfully read users' preference! ******
+3766 students, 63 videos!
+****** Cost 0s! ******
+****** Successfully calculate users' similarity! ******
+****** Cost 818s! ******
+****** Successfully store users' similarity! ******
+****** Cost 823s! ******
+*/
