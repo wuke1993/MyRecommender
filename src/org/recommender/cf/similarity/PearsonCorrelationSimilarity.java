@@ -1,8 +1,5 @@
 package org.recommender.cf.similarity;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
 * @author : wuke
 * @date   : 20170531 22:29:21
@@ -16,30 +13,28 @@ public class PearsonCorrelationSimilarity implements UserSimilarity {
 	public static void main(String[] args) {
 		
 		PearsonCorrelationSimilarity pearsonCS = new PearsonCorrelationSimilarity();
-		List<Double> listA = new ArrayList<Double>();
-		List<Double> listB = new ArrayList<Double>();
+		double[] preferenceArrX = {1.0, 2.0, 3.0, 5.0, 8.0};
+		double[] preferenceArrY = {0.11, 0.12, 0.13, 0.15, 0.18};
 		
-		listA.add(1.0);listA.add(2.0);listA.add(3.0);listA.add(5.0);listA.add(8.0);
-		listB.add(0.11);listB.add(0.12);listB.add(0.13);listB.add(0.15);listB.add(0.18);
-		System.out.println(pearsonCS.calSimilarity(listA, listB));
+		System.out.println(pearsonCS.calSimilarity(preferenceArrX, preferenceArrY));
 	}
 	
 	@Override
-	public double calSimilarity(List<Double> listA, List<Double> listB) {
+	public double calSimilarity(double[] preferenceArrX, double[] preferenceArrY) {
 		double similarity = 0.0;
 		
-		int size = listA.size();
+		int size = preferenceArrX.length;
 		double sum_product = 0.0; // product, the number you get by multiplying two or more numbers in mathematics
 		double sum_listA = 0.0;
 		double sum_listB = 0.0;
 		double sum_square_listA = 0.0;
 		double sum_square_listB = 0.0;
 		for(int i = 0; i < size; i++) {
-			sum_product += listA.get(i) * listB.get(i);
-			sum_listA += listA.get(i);
-			sum_listB += listB.get(i);
-			sum_square_listA += Math.pow(listA.get(i), 2);
-			sum_square_listB += Math.pow(listB.get(i), 2);
+			sum_product += preferenceArrX[i] * preferenceArrY[i];
+			sum_listA += preferenceArrX[i];
+			sum_listB += preferenceArrY[i];
+			sum_square_listA += Math.pow(preferenceArrX[i], 2);
+			sum_square_listB += Math.pow(preferenceArrY[i], 2);
 		}
 		
 		double dividend = size * sum_product - sum_listA * sum_listB;

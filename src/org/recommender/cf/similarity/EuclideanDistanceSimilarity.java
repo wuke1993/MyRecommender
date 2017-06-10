@@ -1,7 +1,5 @@
 package org.recommender.cf.similarity;
 
-import java.util.List;
-
 /**
 * @author : wuke
 * @date   : 20170531 22:28:58
@@ -11,7 +9,7 @@ import java.util.List;
 public class EuclideanDistanceSimilarity implements UserSimilarity {
 
 	@Override
-	public double calSimilarity(List<Double> listA, List<Double> listB) {
+	public double calSimilarity(double[] listA, double[] listB) {
 		return 0;
 	}
 

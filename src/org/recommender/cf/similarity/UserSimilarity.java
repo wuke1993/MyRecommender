@@ -1,7 +1,5 @@
 package org.recommender.cf.similarity;
 
-import java.util.List;
-
 /**
 * @author : wuke
 * @date   : 20170531 22:27:47
@@ -10,6 +8,6 @@ import java.util.List;
 */
 public interface UserSimilarity {
 
-	double calSimilarity(List<Double> listA, List<Double> listB);
+	double calSimilarity(double[] listA, double[] listB);
 	
 }
