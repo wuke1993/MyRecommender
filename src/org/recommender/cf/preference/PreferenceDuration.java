@@ -21,10 +21,11 @@ public class PreferenceDuration implements Preference {
 	public static void main(String[] args) {
 
 		Connection conn = MySqlConn.getConn();
+		
 		String tableName = "my_maozedong_sequence";
-		// String sql = "SELECT stuno, tlen, title, sequence FROM " + tableName;
 		String sql = "SELECT stuno, tlen, title, sequence FROM " + tableName
-				+ " WHERE rtime BETWEEN \"2015-02-01 00:00:00\" AND \"2015-07-31 23:59:59\""; // We got 3766 students!
+				+ " WHERE rtime BETWEEN \"2015-02-01 00:00:00\" AND \"2015-06-31 23:59:59\""; // We got 3766 students!
+		
 		String path1 = "E:\\data\\DLC_forum\\recommender\\cf_preferenceDuration_detail.txt";
 		String path2 = "E:\\data\\DLC_forum\\recommender\\cf_preferenceDuration.txt";
 		

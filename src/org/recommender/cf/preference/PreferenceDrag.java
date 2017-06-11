@@ -18,7 +18,7 @@ public class PreferenceDrag implements Preference {
 		String tableName = "my_maozedong_drag_sequence";
 		// String sql = "SELECT stuno, tlen, title, sequence FROM " + tableName;
 		String sql = "SELECT stuno, tlen, title, sequence FROM " + tableName
-				+ " WHERE rtime BETWEEN \"2015-02-01 00:00:00\" AND \"2015-07-31 23:59:59\""; // We got 1160 students!
+				+ " WHERE rtime BETWEEN \"2015-02-01 00:00:00\" AND \"2015-06-31 23:59:59\""; // We got 1160 students!
 		String path1 = "E:\\data\\DLC_forum\\recommender\\cf_preferenceDrag_detail.txt";
 		String path2 = "E:\\data\\DLC_forum\\recommender\\cf_preferenceDrag.txt";
 		
