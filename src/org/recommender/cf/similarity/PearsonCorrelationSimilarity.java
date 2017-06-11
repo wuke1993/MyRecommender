@@ -14,7 +14,7 @@ public class PearsonCorrelationSimilarity implements UserSimilarity {
 		
 		PearsonCorrelationSimilarity pearsonCS = new PearsonCorrelationSimilarity();
 		double[] preferenceArrX = {1.0, 2.0, 3.0, 5.0, 8.0};
-		double[] preferenceArrY = {0.11, 0.12, 0.13, 0.15, 0.18};
+		double[] preferenceArrY = {0.18, 0.15, 0.13, 0.12, 0.11};
 		
 		System.out.println(pearsonCS.calSimilarity(preferenceArrX, preferenceArrY));
 	}
