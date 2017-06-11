@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 
 import org.recommender.utility.GetProperty;
+import org.recommender.utility.StoreStringIntoFile;
 
 /**
 * @author : wuke
@@ -21,8 +22,6 @@ public class CalNeighbors {
 		
 		int parameter_k = Integer.parseInt(GetProperty.getPropertyByName("PARAMETER_K"));
 		int[][] neighborsMatrix = CalNeighbors.calKNeighbors(user_num, parameter_k, similarityMatrix);
-		
-		System.out.println(neighborsMatrix.toString());
 	}
 	
     /**
@@ -37,6 +36,10 @@ public class CalNeighbors {
 		
 		for(int i = 0; i < user_num; i++)
 			neighborsMatrix[i] = new FindKNeighbors().genNeighbors(parameter, i + 1, similarityMatrix[i]);
+		
+		
+		String path = GetProperty.getPropertyByName("K_NEIGHBORS_PATH");
+		CalNeighbors.storeNeighborsMatrix(neighborsMatrix, path);
 		
 		return neighborsMatrix;
 	}
@@ -89,6 +92,29 @@ public class CalNeighbors {
 		}
 		
 		return similarityMatrix;
+	}
+	
+	/**
+	 * 
+	 * @param neighborsMatrix
+	 * @param path
+	 */
+	private static void storeNeighborsMatrix(int[][] neighborsMatrix, String path) {
+		
+		StringBuilder neighborsMatrixSb = new StringBuilder();
+		
+		for(int i = 0; i < neighborsMatrix.length; i++) {
+			for(int j = 0; j < (neighborsMatrix[i].length - 1); j++) {
+				neighborsMatrixSb.append(neighborsMatrix[i][j]);
+				neighborsMatrixSb.append(",");
+			}
+			neighborsMatrixSb.append(neighborsMatrix[i][neighborsMatrix[i].length - 1]);
+			
+			neighborsMatrixSb.append("\n");
+		}
+		
+		// stroe into file
+		StoreStringIntoFile.storeString(neighborsMatrixSb.toString(), path);
 	}
 	
 }
