@@ -39,7 +39,7 @@ public class FindKNeighbors implements FindNeighbors {
 			}
 		}
 		
-		return index;
+		return index; // TODO
 	}
 
 }
