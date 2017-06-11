@@ -62,6 +62,8 @@ public class CalPreference {
 			Double preferenceTimes = 0.0;
 			Double preferenceDrag = 0.0;
 			Double preferenceDuration = 0.0;
+			
+			HashMap<Integer, Double> video_preference = new HashMap<Integer, Double>();
 			for(Entry<Integer, Double> entry2 : video_preferenceTimes.entrySet()) {
 				video_sequence = entry2.getKey();
 				preferenceTimes = entry2.getValue();
@@ -76,10 +78,9 @@ public class CalPreference {
 				preference = coefficient_times * preferenceTimes + coefficient_drag * preferenceDrag 
 						+ coefficient_duration * preferenceDuration;
 				
-				HashMap<Integer, Double> video_preference = new HashMap<Integer, Double>();
 				video_preference.put(video_sequence, preference);
-				stuno_video_preference.put(stuno, video_preference);
 			}
+			stuno_video_preference.put(stuno, video_preference);
 		}
 		
 		// store the result
@@ -105,6 +106,7 @@ public class CalPreference {
 			reader = new BufferedReader(inputStreamReader);
 			
 			String str = "";
+			HashMap<Integer, Double> video_preference = null;
 			while((str = reader.readLine()) != null) {
 				String[] strArr = str.split(",");
 				
@@ -112,10 +114,14 @@ public class CalPreference {
 				video_sequence = Integer.parseInt(strArr[1]);
 				preference = Double.parseDouble(strArr[2]);
 				
-				HashMap<Integer, Double> video_preference = new HashMap<Integer, Double>();
-				video_preference.put(video_sequence, preference);
-				
-				stuno_video_preference.put(stuno, video_preference);
+				if(stuno_video_preference.containsKey(stuno)) { // old user
+					video_preference = stuno_video_preference.get(stuno);
+					video_preference.put(video_sequence, preference);
+				} else { // new user
+					video_preference = new HashMap<Integer, Double>();
+					video_preference.put(video_sequence, preference);
+					stuno_video_preference.put(stuno, video_preference);
+				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
