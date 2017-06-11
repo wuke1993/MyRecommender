@@ -3,9 +3,8 @@ package org.recommender.cf.similarity;
 import java.io.File;
 import java.io.FileWriter;
 
-import org.recommender.preference.DLCPreferenceReader;
+import org.recommender.cf.preference.DLCPreferenceReader;
 import org.recommender.utility.GetProperty;
-import org.recommender.utility.StoreStringIntoFile;
 
 /**
 * @author : wuke
@@ -25,7 +24,9 @@ public class CalSimilarityMatrix {
 		String preference_path = GetProperty.getPropertyByName("PREFERENCE_PATH");
 		int user_num = Integer.parseInt(GetProperty.getPropertyByName("USER_NUM"));
 		int item_num = Integer.parseInt(GetProperty.getPropertyByName("ITEM_NUM"));
+		
 		double[][] preferenceMatrix = new DLCPreferenceReader().readPreferenceMatrix(preference_path, user_num, item_num);
+		
 		System.out.println("****** Successfully read users' preference! ******");
 		System.out.println(preferenceMatrix.length + " students, " + preferenceMatrix[0].length + " videos!");
 		long cost = (System.currentTimeMillis() - start) / 1000;
@@ -33,17 +34,20 @@ public class CalSimilarityMatrix {
 		
 		// calculate users' similarity
 		double[][] similarityMatrix = calSM.calSimilarityMatrix(preferenceMatrix, user_num);
+		
 		System.out.println("****** Successfully calculate users' similarity! ******");
 		cost = (System.currentTimeMillis() - start) / 1000;
 		System.out.println("****** Cost " + cost + "s! ******");
 		
 		// store users' similarity
-		String similarity_path = GetProperty.getPropertyByName("SIMILARITY_PATH");
+		/*String similarity_path = GetProperty.getPropertyByName("SIMILARITY_PATH");
 		//String similarity_with_forum_correlation_path = GetProperty.getPropertyByName("SIMILARITY_WITH_FORUM_CORRELATION_PATH");
+		
 		calSM.storeSimilarityMatrix(similarityMatrix, similarity_path);
 		System.out.println("****** Successfully store users' similarity! ******");
-		cost = (System.currentTimeMillis() - cost - 2 * start) / 1000;
-		System.out.println("****** Cost " + cost + "s! ******");
+		
+		cost = (System.currentTimeMillis() - cost - start) / 1000;
+		System.out.println("****** Cost " + cost + "s! ******");*/
 		
 	}
 	
@@ -80,26 +84,10 @@ public class CalSimilarityMatrix {
 	 * Store similarity matrix into file.
 	 * @param similarityMatrix
 	 * @param path
-	 */
+	 * Too big for StoreStringIntoFile.storeString() to handle.
+	 * TODO Values missed in the last line. 
+	 */	
 	private void storeSimilarityMatrix(double[][] similarityMatrix, String path) {
-		
-		StringBuilder similarityMatrixSb = new StringBuilder();
-		
-		for(int i = 0; i < similarityMatrix.length; i++) {
-			for(int j = 0; j < (similarityMatrix[i].length - 1); j++) {
-				similarityMatrixSb.append(similarityMatrix[i][j]);
-				similarityMatrixSb.append(",");
-			}
-			similarityMatrixSb.append(similarityMatrix[i][similarityMatrix[i].length - 1]);
-			
-			similarityMatrixSb.append("\n");
-		}
-		
-		// stroe into file
-		StoreStringIntoFile.storeString(similarityMatrixSb.toString(), path);
-	}
-	
-	private void storeSimilarityMatrix_Unused(double[][] similarityMatrix, String path) {
 		
 		File file = new File(path);
 		FileWriter fw = null;
@@ -127,13 +115,3 @@ public class CalSimilarityMatrix {
 	}
 	
 }
-/*
-Successfully store file in E:\data\DLC_forum\recommender\cf_preference_matrix.txt
-****** Successfully read users' preference! ******
-3766 students, 63 videos!
-****** Cost 0s! ******
-****** Successfully calculate users' similarity! ******
-****** Cost 818s! ******
-****** Successfully store users' similarity! ******
-****** Cost 823s! ******
-*/

@@ -18,11 +18,12 @@ public class CalTwoUsersSimilarity {
 		PearsonCorrelationSimilarity pearsonCS = new PearsonCorrelationSimilarity();
 		pearson_similarity = pearsonCS.calSimilarity(preferenceArrX, preferenceArrY);
 		
-		ForumCorrelation forumCorrelation = new ForumPostAnswerCorrelation();
+		similarity = pearson_similarity;
+		/*ForumCorrelation forumCorrelation = new ForumPostAnswerCorrelation();
 		forum_correlation = forumCorrelation.calForumCorrelation(stuno_sequence_x, stuno_sequence_y);
 		
 		double weight_forum_correlation = Double.parseDouble(GetProperty.getPropertyByName("WEIGHT_FORUM_CORRELATION"));
-		similarity = pearson_similarity +  weight_forum_correlation * forum_correlation;
+		similarity = pearson_similarity +  weight_forum_correlation * forum_correlation;*/
 		
 		return similarity;
 	}
