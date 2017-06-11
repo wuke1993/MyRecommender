@@ -1,4 +1,4 @@
-package org.recommender.preference;
+package org.recommender.cf.preference;
 /**
 * @author : wuke
 * @date   : 20170610 23:42:17

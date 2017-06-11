@@ -1,4 +1,4 @@
-package org.recommender.preference;
+package org.recommender.cf.preference;
 
 import java.io.BufferedReader;
 import java.io.File;
