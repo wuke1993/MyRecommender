@@ -29,7 +29,7 @@ public class PearsonCorrelationSimilarity implements UserSimilarity {
 		double sum_listB = 0.0;
 		double sum_square_listA = 0.0;
 		double sum_square_listB = 0.0;
-		for(int i = 0; i < size; i++) {
+		for (int i = 0; i < size; i++) {
 			sum_product += preferenceArrX[i] * preferenceArrY[i];
 			sum_listA += preferenceArrX[i];
 			sum_listB += preferenceArrY[i];
@@ -42,12 +42,12 @@ public class PearsonCorrelationSimilarity implements UserSimilarity {
 		
 		// System.out.println(dividend + " " + divisor);
 		
-		if(Math.abs(divisor - 0) < DOUBLE_ZERO)
+		if (Math.abs(divisor - 0) < DOUBLE_ZERO) {
 			similarity = 0.0;
-		else
+		} else {
 			similarity = dividend / divisor;
-			
+		}
+		
 		return similarity;
 	}
-
 }

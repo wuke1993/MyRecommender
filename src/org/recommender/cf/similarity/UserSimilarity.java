@@ -7,7 +7,5 @@ package org.recommender.cf.similarity;
 * Description : 
 */
 public interface UserSimilarity {
-
 	double calSimilarity(double[] listA, double[] listB);
-	
 }
