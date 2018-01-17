@@ -10,9 +10,9 @@ import java.sql.SQLException;
  * @author: wuke 
  * @date  : 20160704 10:53:20
  * Title  : MySqlConn
- * Description : 
+ * Description : 连接数据库 dlc_data
  */
-public class MySqlConn {
+public class MySQLHelper {
 	
 	/**
 	 * Return MySQL Connection.
@@ -20,7 +20,9 @@ public class MySqlConn {
 	 */
 	public static Connection getConn() {
 		String driver = "com.mysql.jdbc.Driver";
-		String url = "jdbc:mysql://localhost:3306/logstat2015_new_backup?characterEncoding=utf8&useSSL=false";
+		String url = "jdbc:mysql://localhost:3306/dlc_data"
+				+ "?characterEncoding=utf8&useSSL=false"
+				+ "&useServerPrepStmts=false&rewriteBatchedStatements=true";
 		String username = "root";
 		String password = "1234";
 		Connection conn = null;
@@ -35,8 +37,9 @@ public class MySqlConn {
 	
 	/**
 	 * 
+	 * @param conn
 	 * @param sql
-	 * @return rs ResultSet
+	 * @return
 	 */
 	public static ResultSet getResultSet(Connection conn, String sql) {
 		PreparedStatement psmt = null;
@@ -52,15 +55,25 @@ public class MySqlConn {
 		return rs;
 	}
 	
-	public static void executeUpdate(Connection conn, String sql) {
+	/**
+	 * 
+	 * @param conn
+	 * @param sql
+	 */
+	public static void executeUpdate(Connection conn, String sql, String errorLogPath) {
 		PreparedStatement psmt = null;
 		
 		try {
 			psmt = conn.prepareStatement(sql);
 			psmt.executeUpdate();
-			System.out.println("Successfully update!");
 		} catch (SQLException e) {
-			e.printStackTrace();
+			
+			if (!errorLogPath.equals("")) {
+				StoreStringIntoFile.storeString(sql + "\r\n", errorLogPath, true);
+			} else {
+				e.printStackTrace();
+			}
+			
 		}
 	}
 }
