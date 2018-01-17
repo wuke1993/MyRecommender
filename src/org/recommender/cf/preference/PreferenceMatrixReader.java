@@ -6,6 +6,5 @@ package org.recommender.cf.preference;
 * Description : 
 */
 public interface PreferenceMatrixReader {
-	
 	double[][] readPreferenceMatrix(String path, int user_num, int item_num);
 }

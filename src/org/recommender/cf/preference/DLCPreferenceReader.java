@@ -20,24 +20,17 @@ public class DLCPreferenceReader implements PreferenceMatrixReader {
 		int user_num = Integer.parseInt(GetProperty.getPropertyByName("USER_NUM"));
 		int item_num = Integer.parseInt(GetProperty.getPropertyByName("ITEM_NUM"));
 		
-		new DLCPreferenceReader().readPreferenceMatrix(preference_path, user_num, item_num);
+		double[][] preferenceMatrix = new DLCPreferenceReader().readPreferenceMatrix(preference_path, user_num, item_num);
+		String path = GetProperty.getPropertyByName("PREFERENCE_MATRIX_PATH");
+		DLCPreferenceReader.storePreferenceMatrix(preferenceMatrix, path);
 	}
+	
 	@Override
-	public double[][] readPreferenceMatrix(String path, int user_num, int item_num) {
-		// user_num = Integer.parseInt(GetProperty.getPropertyByName("USER_NUM"));
-		// item_num = Integer.parseInt(GetProperty.getPropertyByName("ITEM_NUM_NUM"));
-		
+	public double[][] readPreferenceMatrix(String path, int user_num, int item_num) {		
 		double[][] preferenceMatrix = new double[user_num][item_num];
 		
-		for(int i = 0; i < preferenceMatrix.length; i++) {
-			for(int j = 0; j < (preferenceMatrix[i].length - 1); j++) {
-				preferenceMatrix[i][j] = 0.0;
-			}
-		}
-		
-		// read from file
 		int stuno_sequence = 0;
-		// double stuno = 0.0;
+		// long stuno = 0.0;
 		int item_sequence = 0;
 		double preference = 0.0;
 		BufferedReader br = null;
@@ -46,11 +39,11 @@ public class DLCPreferenceReader implements PreferenceMatrixReader {
 			FileReader fr = new FileReader(file);
 			br = new BufferedReader(fr);
 			String line = "";
-			while((line = br.readLine()) != null) {
+			while ((line = br.readLine()) != null) {
 				String[] strs = line.split(",");
 				
 				stuno_sequence = Integer.parseInt(strs[0]);
-				// stuno = Double.parseDouble(strs[1]);
+				// stuno = Long.parseDouble(strs[1]);
 				item_sequence = Integer.parseInt(strs[2]);
 				preference = Double.parseDouble(strs[3]);
 				
@@ -60,23 +53,14 @@ public class DLCPreferenceReader implements PreferenceMatrixReader {
 			e.printStackTrace();
 		}
 		
-		String path2 = GetProperty.getPropertyByName("PREFERENCE_MATRIX_PATH");
-		DLCPreferenceReader.storePreferenceMatrix(preferenceMatrix, path2);
-		
 		return preferenceMatrix;
 	}
-
-	/**
-	 * Store the preference matrix.
-	 * @param preferenceMatrix
-	 * @param path
-	 */
+	
 	private static void storePreferenceMatrix(double[][] preferenceMatrix, String path) {
-		
 		StringBuilder sb = new StringBuilder();
 		
-		for(int i = 0; i < preferenceMatrix.length; i++) {
-			for(int j = 0; j < (preferenceMatrix[i].length - 1); j++) {
+		for (int i = 0; i < preferenceMatrix.length; i++) {
+			for (int j = 0; j < (preferenceMatrix[i].length - 1); j++) {
 				sb.append(preferenceMatrix[i][j]);
 				sb.append(",");
 			}
@@ -84,7 +68,7 @@ public class DLCPreferenceReader implements PreferenceMatrixReader {
 			sb.append("\n");
 		}
 		
-		StoreStringIntoFile.storeString(sb.toString(), path);
+		StoreStringIntoFile.storeString(sb.toString(), path, false);
 	}
 	
 }

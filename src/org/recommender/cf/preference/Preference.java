@@ -9,6 +9,5 @@ import java.sql.Connection;
 * Description : 
 */
 public interface Preference {
-
 	void calPreference(Connection conn, String sql, String path1, String path2);
 }
