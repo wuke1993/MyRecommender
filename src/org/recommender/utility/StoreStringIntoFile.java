@@ -11,13 +11,32 @@ import java.io.IOException;
 * Description : 
 */
 public class StoreStringIntoFile {
-	
 	public static void storeString(String str, String path) {
 		File file = new File(path);
 		FileWriter fw = null;
 		
 		try {
-			fw = new FileWriter(file);
+			fw = new FileWriter(file, false);
+			fw.write(str);
+			
+			System.out.println("Successfully store file in " + path);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				fw.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public static void storeString(String str, String path, boolean append) {
+		File file = new File(path);
+		FileWriter fw = null;
+		
+		try {
+			fw = new FileWriter(file, append);
 			fw.write(str);
 			
 			System.out.println("Successfully store file in " + path);
