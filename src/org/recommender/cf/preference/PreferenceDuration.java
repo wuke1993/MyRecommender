@@ -4,10 +4,13 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.recommender.utility.MySqlConn;
+import org.recommender.data.LearningLog;
+import org.recommender.utility.GetProperty;
+import org.recommender.utility.MySQLHelper;
 import org.recommender.utility.StoreStringIntoFile;
 
 /**
@@ -16,19 +19,16 @@ import org.recommender.utility.StoreStringIntoFile;
 * Title   : PreferenceDuration
 * Description : 
 */
-public class PreferenceDuration implements Preference {
-
+public class PreferenceDuration implements Preference {	
 	public static void main(String[] args) {
 
-		Connection conn = MySqlConn.getConn();
+		Connection conn = MySQLHelper.getConn();
 		
-		String tableName = "my_maozedong_sequence";
-		String sql = "SELECT stuno, tlen, title, sequence FROM " + tableName
-				+ " WHERE rtime BETWEEN \"2015-02-01 00:00:00\" AND \"2015-06-31 23:59:59\""; // We got 3766 students!
+		String tableName = "my_cs_log_stulearns_4th";
+		String sql = "SELECT stuno, title, tlen FROM " + tableName + " WHERE platform = 2 AND oper = 76";
 		
-		String path1 = "E:\\data\\DLC_forum\\recommender\\cf_preferenceDuration_detail.txt";
-		String path2 = "E:\\data\\DLC_forum\\recommender\\cf_preferenceDuration.txt";
-		
+		String path1 = GetProperty.getPropertyByName("PREFERENCE_DURATION_DETAIL_PATH");
+		String path2 = GetProperty.getPropertyByName("PREFERENCE_DURATION_PATH");
 		PreferenceDuration preferenceDuration = new PreferenceDuration();
 		preferenceDuration.calPreference(conn, sql, path1, path2);
 	}
@@ -37,85 +37,106 @@ public class PreferenceDuration implements Preference {
 	public void calPreference(Connection conn, String sql, String path1, String path2) {
 		Map<Long, HashMap<Integer, Integer>> stuno_video_times = new HashMap<Long, HashMap<Integer, Integer>>();
 		Map<Long, HashMap<Integer, Integer>> stuno_video_totalTlen = new HashMap<Long, HashMap<Integer, Integer>>();
+		
+		HashMap<String, Integer> videos = VideoSequenceDur.readVideo(conn); // (课程视频名, 课程视频次序)
 				
-        ResultSet rs = MySqlConn.getResultSet(conn, sql);
+        ResultSet rs = MySQLHelper.getResultSet(conn, sql);
 		long stuno = 0;
+		String title = "";
 		int tlen = 0;
-		// String title = "";
-		String sequence = "";
+		Integer video_sequence = 0;
+		HashMap<Integer, Integer> video_times = null;
+		HashMap<Integer, Integer> video_totalTlen = null;
 		try {
-			while(rs.next()) {
+			while (rs.next()) {
 				stuno = rs.getLong(1);
-				tlen = rs.getInt(2);
-				// title = rs.getString(3);
-				sequence = rs.getString(4);
-
-				int video_sequence = Integer.parseInt(sequence.split("\\.")[0]);
+				title = rs.getString(2);
+				tlen = rs.getInt(3);
 				
-				// calculate stuno_video_times and stuno_video_totalTlen
-				if(stuno_video_times.containsKey(stuno)) { // old student
-					HashMap<Integer, Integer> video_times = stuno_video_times.get(stuno);
-					HashMap<Integer, Integer> video_totalTlen = stuno_video_totalTlen.get(stuno);
-					
-					if(video_times.containsKey(video_sequence)) { // watched video
-						video_times.put(video_sequence, video_times.get(video_sequence) + 1);						
-						video_totalTlen.put(video_sequence, video_totalTlen.get(video_sequence) + tlen);
-					} else { // new video
-						video_times.put(video_sequence, 1);					
+				video_sequence = videos.get(title);
+				if (video_sequence != null) {
+					if (stuno_video_times.containsKey(stuno)) { // old student
+						video_times = stuno_video_times.get(stuno);
+						video_totalTlen = stuno_video_totalTlen.get(stuno);
+						
+						if (video_times.containsKey(video_sequence)) { // watched video
+							video_times.put(video_sequence, video_times.get(video_sequence) + 1);
+							video_totalTlen.put(video_sequence, video_totalTlen.get(video_sequence) + tlen);
+						} else { // new video
+							video_times.put(video_sequence, 1);					
+							video_totalTlen.put(video_sequence, tlen);
+						}
+					} else { // new student with new video
+						video_times = new HashMap<Integer, Integer>();
+						video_times.put(video_sequence, 1);
+						
+						video_totalTlen = new HashMap<Integer, Integer>();
 						video_totalTlen.put(video_sequence, tlen);
+						
+						stuno_video_times.put(stuno, video_times);
+						stuno_video_totalTlen.put(stuno, video_totalTlen);
 					}
-				} else { // new student with new video
-					HashMap<Integer, Integer> video_times = new HashMap<Integer, Integer>();
-					video_times.put(video_sequence, 1);
-					
-					HashMap<Integer, Integer> video_totalTlen = new HashMap<Integer, Integer>();
-					video_totalTlen.put(video_sequence, tlen);
-					
-					stuno_video_times.put(stuno, video_times);
-					stuno_video_totalTlen.put(stuno, video_totalTlen);
 				}
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		
-		// print number of students
-		System.out.println("We got " + stuno_video_times.size() + " students!");
+		System.out.println(stuno_video_times.size() + " 个学生"); // 654 个学生
 		
-		String sql2 = "SELECT dur, urlppt FROM my_maozedong_kj_courseitems";
-		Map<Integer, Integer> videos_dur = PreferenceDuration.getVideosDur(conn, sql2);
+		Map<Integer, Integer> video_dur = VideoSequenceDur.getVideosDur(conn);
 		
-		// store the result
-		this.storePreferenceDuration(stuno_video_times, stuno_video_totalTlen, videos_dur, path1, path2);
+		this.storePreferenceDuration(stuno_video_times, stuno_video_totalTlen, video_dur, path1, path2); // store the result
 	}
-
-	/**
-	 * Get videos' duration from table 'my_maozedong_kj_courseitems'.
-	 * @param conn
-	 * @param sql
-	 * @return
-	 */
-	private static Map<Integer, Integer> getVideosDur(Connection conn, String sql) {
-		Map<Integer, Integer> videos_dur = new HashMap<Integer, Integer>();
+	
+	public void calPreference(Connection conn, List<LearningLog> logs, String path1, String path2) {
+		Map<Long, HashMap<Integer, Integer>> stuno_video_times = new HashMap<Long, HashMap<Integer, Integer>>();
+		Map<Long, HashMap<Integer, Integer>> stuno_video_totalTlen = new HashMap<Long, HashMap<Integer, Integer>>();
 		
-		ResultSet rs = MySqlConn.getResultSet(conn, sql);
-		
-		int dur = 0;
-		String sequence = "";
-		try {
-			while(rs.next()) {
-				dur = rs.getInt(1);
-				sequence = rs.getString(2);
+		HashMap<String, Integer> videos = VideoSequenceDur.readVideo(conn); // (课程视频名, 课程视频次序)
 				
-				int video_sequence = Integer.parseInt(sequence.split("\\.")[0]);
-				
-				videos_dur.put(video_sequence, dur);
+		long stuno = 0;
+		String title = "";
+		int tlen = 0;
+		Integer video_sequence = 0;
+		HashMap<Integer, Integer> video_times = null;
+		HashMap<Integer, Integer> video_totalTlen = null;
+		for(LearningLog aLearningLog : logs) {
+			stuno = aLearningLog.getStuno();
+			title = aLearningLog.getTitle();
+			tlen = aLearningLog.getTlen();
+			
+			video_sequence = videos.get(title);
+			if (video_sequence != null) {
+				if (stuno_video_times.containsKey(stuno)) { // old student
+					video_times = stuno_video_times.get(stuno);
+					video_totalTlen = stuno_video_totalTlen.get(stuno);
+					
+					if (video_times.containsKey(video_sequence)) { // watched video
+						video_times.put(video_sequence, video_times.get(video_sequence) + 1);
+						video_totalTlen.put(video_sequence, video_totalTlen.get(video_sequence) + tlen);
+					} else { // new video
+						video_times.put(video_sequence, 1);					
+						video_totalTlen.put(video_sequence, tlen);
+					}
+				} else { // new student with new video
+					video_times = new HashMap<Integer, Integer>();
+					video_times.put(video_sequence, 1);
+					
+					video_totalTlen = new HashMap<Integer, Integer>();
+					video_totalTlen.put(video_sequence, tlen);
+					
+					stuno_video_times.put(stuno, video_times);
+					stuno_video_totalTlen.put(stuno, video_totalTlen);
+				}
 			}
-		} catch (SQLException e) {
-			e.printStackTrace();
 		}
 		
-		return videos_dur;
+		System.out.println(stuno_video_times.size() + " 个学生");
+		
+		Map<Integer, Integer> video_dur = VideoSequenceDur.getVideosDur(conn);
+		
+		this.storePreferenceDuration(stuno_video_times, stuno_video_totalTlen, video_dur, path1, path2); // store the result
 	}
 	
 	/**
@@ -123,60 +144,58 @@ public class PreferenceDuration implements Preference {
 	 * @param stuno_video_times
 	 * @param stuno_video_totalTlen
 	 * @param videos_dur
-	 * @param path1
-	 * @param path2
 	 */
-	private void storePreferenceDuration(Map<Long, HashMap<Integer, Integer>> stuno_video_times, 
-			Map<Long, HashMap<Integer, Integer>> stuno_video_totalTlen, 
-			Map<Integer, Integer> videos_dur, String path1, String path2) {
+	private void storePreferenceDuration(Map<Long, HashMap<Integer, Integer>> stuno_video_times, Map<Long, HashMap<Integer, Integer>> stuno_video_totalTlen, 
+			Map<Integer, Integer> video_dur, String path1, String path2) {
 		
 		StringBuilder preference_detail = new StringBuilder();
 		StringBuilder preference = new StringBuilder();
 		
 		long stuno = 0;
-		int video_sequence = 0;
-		double video_totalTlen = 0; // double!
-		double video_times = 0; // double!
-		double video_dur = 0; // double!
-		
-		double preferenceDuration = 0;
-		for(Entry<Long, HashMap<Integer, Integer>> entry : stuno_video_times.entrySet()) {
+		HashMap<Integer, Integer> video_times = null;
+		for (Entry<Long, HashMap<Integer, Integer>> entry : stuno_video_times.entrySet()) {
 			stuno = entry.getKey();
-			HashMap<Integer, Integer> hs_video_times = entry.getValue();
+			video_times = entry.getValue();
 			
+			int sequence = 0;
+			double times = 0;
+			double totalTlen = 0;
+			double dur = 0;
+			double preferenceDuration = 0;
 			try {
+				for (Entry<Integer, Integer> entry2 : video_times.entrySet()) {
+					sequence = entry2.getKey();
+					times = entry2.getValue();
+					
+					totalTlen = stuno_video_totalTlen.get(stuno).get(sequence);
+					
+					dur = video_dur.get(sequence);
+					
+					preferenceDuration = (totalTlen / times) / dur;
+					
+					// preference_detail
+					preference_detail.append(stuno);
+					preference_detail.append("," + sequence);
+					preference_detail.append("," + times);
+					preference_detail.append("," + totalTlen);
+					preference_detail.append("," + dur);
+					preference_detail.append("\n");
+					
+					// preference
+					preference.append(stuno);
+					preference.append("," + sequence);
+					preference.append("," + preferenceDuration);
+					preference.append("\n");
+				}
 			
-			for(Entry<Integer, Integer> entry2 : hs_video_times.entrySet()) {
-				video_sequence = entry2.getKey();
-				video_times = entry2.getValue();
-								
-				video_totalTlen = stuno_video_totalTlen.get(stuno).get(video_sequence);
-				video_dur = videos_dur.get(video_sequence);
-				
-				preferenceDuration = (video_totalTlen / video_times) / video_dur;
-				
-				preference_detail.append(stuno);
-				preference_detail.append("," + video_sequence);
-				preference_detail.append("," + video_totalTlen);
-				preference_detail.append("," + video_times);
-				preference_detail.append("," + video_dur);
-				preference_detail.append("\n");
-				
-				preference.append(stuno);
-				preference.append("," + video_sequence);
-				preference.append("," + preferenceDuration);
-				preference.append("\n");
-			}
-			
-			} catch(Exception e) {
-				// e.printStackTrace();
-				System.out.println(stuno + " *** " + video_sequence);
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
 		
 		// stroe into file
-		StoreStringIntoFile.storeString(preference_detail.toString(), path1);
-		StoreStringIntoFile.storeString(preference.toString(), path2);
+		StoreStringIntoFile.storeString(preference_detail.toString(), path1, true);
+		StoreStringIntoFile.storeString(preference.toString(), path2, true);
 	}
 	
 }
