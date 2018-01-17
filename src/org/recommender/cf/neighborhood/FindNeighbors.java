@@ -6,7 +6,5 @@ package org.recommender.cf.neighborhood;
 * Description : 
 */
 public interface FindNeighbors {
-
 	int[] genNeighbors(double parameter, int stuno_sequence, double[] similarityArr);
-	
 }

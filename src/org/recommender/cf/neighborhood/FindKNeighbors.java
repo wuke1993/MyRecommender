@@ -17,6 +17,7 @@ public class FindKNeighbors implements FindNeighbors {
 		
 		for(int i = 0; i < k; i++) {
 			neighbors[i] = FindKNeighbors.findMaxIndex(similarityArr);
+			
 			similarityArr[neighbors[i]] = Double.MIN_VALUE;
 		}
 		
@@ -24,22 +25,20 @@ public class FindKNeighbors implements FindNeighbors {
 	}
 
 	/**
-	 * Find the index of the max value in a array.
+	 * 返回数组最大值的下标
 	 * @param arr
 	 * @return
 	 */
 	private static int findMaxIndex(double[] arr) {
-
 		int index = 0;
 		double max = arr[index];
-		for(int i = 0; i < arr.length; i++) {
-			if(arr[i] > max) {
+		for (int i = 0; i < arr.length; i++) {
+			if (arr[i] > max) {
 				index = i;
 				max = arr[index];
 			}
 		}
 		
-		return index; // TODO
+		return index;
 	}
-
 }

@@ -22,6 +22,9 @@ public class CalNeighbors {
 		
 		int parameter_k = Integer.parseInt(GetProperty.getPropertyByName("PARAMETER_K"));
 		int[][] neighborsMatrix = CalNeighbors.calKNeighbors(user_num, parameter_k, similarityMatrix);
+		
+		String path = GetProperty.getPropertyByName("K_NEIGHBORS_PATH");
+		CalNeighbors.storeNeighborsMatrix(neighborsMatrix, path);
 	}
 	
     /**
@@ -31,15 +34,12 @@ public class CalNeighbors {
      * @param similarityMatrix
      * @return
      */
-	public static int[][] calKNeighbors(int user_num, double parameter, double[][] similarityMatrix) {
+	public static int[][] calKNeighbors(int user_num, double parameter_k, double[][] similarityMatrix) {
 		int[][] neighborsMatrix = new int[user_num][];
 		
-		for(int i = 0; i < user_num; i++)
-			neighborsMatrix[i] = new FindKNeighbors().genNeighbors(parameter, i + 1, similarityMatrix[i]);
-		
-		
-		String path = GetProperty.getPropertyByName("K_NEIGHBORS_PATH");
-		CalNeighbors.storeNeighborsMatrix(neighborsMatrix, path);
+		for (int i = 0; i < user_num; i++) {
+			neighborsMatrix[i] = new FindKNeighbors().genNeighbors(parameter_k, i + 1, similarityMatrix[i]);
+		}
 		
 		return neighborsMatrix;
 	}
@@ -51,11 +51,12 @@ public class CalNeighbors {
 	 * @param similarityMatrix
 	 * @return
 	 */
-	public static int[][] calThresholdBasedeighbors(int user_num, double parameter, double[][] similarityMatrix) {
+	public static int[][] calThresholdBasedNeighbors(int user_num, double parameter, double[][] similarityMatrix) {
 		int[][] neighborsMatrix = new int[user_num][];
 		
-		for(int i = 0; i < user_num; i++)
+		for (int i = 0; i < user_num; i++) {
 			neighborsMatrix[i] = new FindThresholdBasedNeighbors().genNeighbors(parameter, i + 1, similarityMatrix[i]);
+		}
 		
 		return neighborsMatrix;
 	}
@@ -78,10 +79,10 @@ public class CalNeighbors {
 			FileReader fr = new FileReader(file);
 			br = new BufferedReader(fr);
 			String line = "";
-			while((line = br.readLine()) != null) {
+			while ((line = br.readLine()) != null) {
 				String[] strs = line.split(",");
 				
-				for(int i = 0; i < user_num; i ++)
+				for (int i = 0; i < user_num; i ++)
 					similarityMatrix[row][i] = Double.parseDouble(strs[i]);
 				
 				row++;
@@ -100,11 +101,10 @@ public class CalNeighbors {
 	 * @param path
 	 */
 	private static void storeNeighborsMatrix(int[][] neighborsMatrix, String path) {
-		
 		StringBuilder neighborsMatrixSb = new StringBuilder();
 		
-		for(int i = 0; i < neighborsMatrix.length; i++) {
-			for(int j = 0; j < (neighborsMatrix[i].length - 1); j++) {
+		for (int i = 0; i < neighborsMatrix.length; i++) {
+			for (int j = 0; j < (neighborsMatrix[i].length - 1); j++) {
 				neighborsMatrixSb.append(neighborsMatrix[i][j]);
 				neighborsMatrixSb.append(",");
 			}
@@ -113,7 +113,6 @@ public class CalNeighbors {
 			neighborsMatrixSb.append("\n");
 		}
 		
-		// stroe into file
 		StoreStringIntoFile.storeString(neighborsMatrixSb.toString(), path);
 	}
 	
