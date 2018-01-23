@@ -2,8 +2,9 @@ package org.recommender.cf;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map.Entry;
 
-import org.recommender.utility.GetProperty;
+import org.recommender.utility.PropertyHelper;
 import org.recommender.utility.StoreStringIntoFile;
 
 /**
@@ -13,7 +14,6 @@ import org.recommender.utility.StoreStringIntoFile;
 * Description : 
 */
 public class GenRecommendations {
-	
 	/**
 	 * 
 	 * @param preferenceMatrix
@@ -22,52 +22,60 @@ public class GenRecommendations {
 	 * @return
 	 */
 	public static ArrayList<HashMap<Integer, Double>> genRecommendationForAll(double[][] preferenceMatrix, 
-			int[][] neighborsMatrix, int recommendation_num) {
+			int[][] neighborsMatrix, int neighbors_num, int recommendation_num) {
 		
 		ArrayList<HashMap<Integer, Double>> recArr = new ArrayList<HashMap<Integer, Double>>();
 		
-		int USER_NUM = Integer.parseInt(GetProperty.getPropertyByName("USER_NUM"));
-		for(int i = 1; i <= USER_NUM; i++)
-			recArr.add(GenRecommendations.genRecommendationForOne(preferenceMatrix, neighborsMatrix, i, recommendation_num));
+		int USER_NUM = Integer.parseInt(PropertyHelper.getProperty("USER_NUM"));
+		for (int i = 1; i <= USER_NUM; i++) {
+			recArr.add(GenRecommendations.genRecommendationForOne(preferenceMatrix, neighborsMatrix, i, neighbors_num, recommendation_num));
+		}
 		
 		return recArr;
 	}
+	
 	/**
-	 * 
+	 * user_sequence, start from 1
+	 * @param preferenceMatrix
+	 * @param neighborsMatrix
+	 * @param user_sequence
 	 * @param recommendation_num
 	 * @return
 	 */
 	public static HashMap<Integer, Double> genRecommendationForOne(double[][] preferenceMatrix, int[][] neighborsMatrix, 
-			int user_sequence, int recommendation_num) {
+			int user_sequence, int neighbors_num, int recommendation_num) {
 		HashMap<Integer, Double> rec = new HashMap<Integer, Double>();
 		
-		double[] own_preferences = GenRecommendations.getPreferences(preferenceMatrix, user_sequence - 1);
+		// neighbors
+		int[] neighbors = neighborsMatrix[user_sequence - 1];
 		
-		int[] neighbors = GenRecommendations.getKNeighbors(neighborsMatrix, user_sequence);
-		int neighbors_num = Integer.parseInt(GetProperty.getPropertyByName("PARAMETER_K"));
+		// neighbors' preferences
 		double[][] k_neighbors_preferences = new double[neighbors_num][];
-		
-		for(int i = 0; i < neighbors.length; i++) {
-			k_neighbors_preferences[i] = GenRecommendations.getPreferences(preferenceMatrix, neighbors[i]);
+		for (int i = 0; i < neighbors_num; i++) { // top "neighbors_num" neighbors
+			k_neighbors_preferences[i] = preferenceMatrix[neighbors[i]];
 		}
 		
-		// generate prediction preferences for the user with the preferences of his/her neighbors
+		// generate prediction preferences for the user by the preferences of his/her neighbors
+		double[] own_preferences = preferenceMatrix[user_sequence - 1];
+		
 		HashMap<Integer, Double> candidate_rec = new HashMap<Integer, Double>();
 		double tem_preferences = 0.0;
-		for(int i = 0; i < own_preferences.length; i ++) {
-			if(own_preferences[i] == 0.0) { // items' preference is zero
-				for(int j = 0; j < k_neighbors_preferences.length; j++) {
+		for (int i = 0; i < own_preferences.length; i ++) {
+			if (doubleEqual(own_preferences[i], 0.0)) { // items' preference is zero	
+				for (int j = 0; j < k_neighbors_preferences.length; j++) {
 					tem_preferences += k_neighbors_preferences[j][i];
 				}
 				tem_preferences /= k_neighbors_preferences.length;
 				
 				candidate_rec.put(i + 1, tem_preferences);
+			} else { // TODO 已看过的还要不要推荐
+				candidate_rec.put(i + 1, own_preferences[i]);
 			}
 		}
 		
 		// find top "recommendation_num" items which have bigger preferences.
 		int index = 0;
-		for(int i = 0; i < recommendation_num; i++) {
+		for (int i = 0; i < recommendation_num; i++) {
 			index = GenRecommendations.findIndexOfMax(candidate_rec);
 			rec.put(index, candidate_rec.get(index));
 			
@@ -78,26 +86,6 @@ public class GenRecommendations {
 	}
 	
 	/**
-	 * Get one user's K-Neighbors.
-	 * @param neighbors_num
-	 * @return
-	 */
-	private static int[] getKNeighbors(int[][] neighborsMatrix, int user_sequence) {
-		
-		return neighborsMatrix[user_sequence - 1];
-	}
-	
-	/**
-	 * Get one user's preferences array.
-	 * @param user_sequence
-	 * @return
-	 */
-	private static double[] getPreferences(double[][] preferenceMatrix, int user_sequence) {
-		
-		return preferenceMatrix[user_sequence];
-	}
-	
-	/**
 	 * 
 	 * @param candidate_rec
 	 * @return
@@ -105,9 +93,9 @@ public class GenRecommendations {
 	private static int findIndexOfMax(HashMap<Integer, Double> candidate_rec) {
 		
 		int index = 9999;
-		double max = 0.0;
-		for(int itme_sequence : candidate_rec.keySet()) {
-			if(max < candidate_rec.get(itme_sequence)) {
+		 double max = Double.MIN_VALUE;
+		for (int itme_sequence : candidate_rec.keySet()) {
+			if (max < candidate_rec.get(itme_sequence)) {
 				max = candidate_rec.get(itme_sequence);
 				index = itme_sequence;
 			}
@@ -116,6 +104,14 @@ public class GenRecommendations {
 		return index;
 	}
     
+	public static boolean doubleEqual(double a, double b) {
+        if (Math.abs(a- b) < 0.00000000000000001) {
+            return true;
+        } else {
+        	return false;
+        }
+	}      
+	
 	/**
 	 * 
 	 * @param recArr
@@ -125,10 +121,10 @@ public class GenRecommendations {
 		StringBuilder sb = new StringBuilder();
 		
 		HashMap<Integer, Double> hm = null;
-		for(int i = 0; i < recArr.size(); i++) {
+		for (int i = 0; i < recArr.size(); i++) {
 			hm = recArr.get(i);
 			
-			for(int video_sequence : hm.keySet()) {
+			for (int video_sequence : hm.keySet()) {
 				sb.append(video_sequence);
 				sb.append(",");
 			}
