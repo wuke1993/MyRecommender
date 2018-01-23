@@ -1,5 +1,6 @@
 package org.recommender.measuring;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -7,12 +8,19 @@ import java.util.Map.Entry;
 
 /**
 * @author : wuke
-* @date   : 2017年6月12日上午4:13:44
+* @date   : 20170612 4:13:44
 * Title   : Measuring
 * Description : 
 */
 public class Measuring {
-
+	public static void main(String[] args) {
+		DecimalFormat df = new DecimalFormat("#.00");
+		
+		double accuracy = 15.559;
+		
+		System.out.println(df.format(accuracy));
+	}
+	
 	public static void calAccuracyRate(ArrayList<HashMap<Integer, Double>> recArr, HashMap<Integer, HashSet<Integer>> stuno_videos) {
 		
 		double accuracy = 0.0;
@@ -23,7 +31,7 @@ public class Measuring {
 		int[] arr1 = null;
         int[] arr2 = null;
 		for(Entry<Integer, HashSet<Integer>> entry : stuno_videos.entrySet()) {
-			hm = recArr.get(entry.getKey());
+			hm = recArr.get(entry.getKey() - 1);
 			hs = entry.getValue();
 			
 			arr1 = new int[hm.size()];
