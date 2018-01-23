@@ -7,7 +7,7 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
-import org.recommender.utility.GetProperty;
+import org.recommender.utility.PropertyHelper;
 import org.recommender.utility.StoreStringIntoFile;
 
 /**
@@ -18,10 +18,7 @@ import org.recommender.utility.StoreStringIntoFile;
 */
 public class CalPreference {
 
-	public static void main(String[] args) {
-
-		CalPreference calculator= new CalPreference();
-		
+	/*public static void main(String[] args) {		
 		double coefficient_times = Double.parseDouble(GetProperty.getPropertyByName("WEIGHT_TIMES"));
 		double coefficient_pause_drag = Double.parseDouble(GetProperty.getPropertyByName("WEIGHT_PAUSE_DRAG"));
 		double coefficient_duration = Double.parseDouble(GetProperty.getPropertyByName("WEIGHT_DURATION"));
@@ -30,16 +27,16 @@ public class CalPreference {
 		String path2 = GetProperty.getPropertyByName("PREFERENCE_PAUSE_DRAG_PATH");
 		String path3 = GetProperty.getPropertyByName("PREFERENCE_DURATION_PATH");
 		String path4 = GetProperty.getPropertyByName("PREFERENCE_PATH");
-		calculator.calPreference(coefficient_times, coefficient_pause_drag, coefficient_duration, path1, path2, path3, path4);
-	}
+		CalPreference.calPreference(coefficient_times, coefficient_pause_drag, coefficient_duration, path1, path2, path3, path4);
+	}*/
 	
-	public void calPreference(double coefficient_times, double coefficient_pause_drag, double coefficient_duration, 
+	public static void calPreference(double coefficient_times, double coefficient_pause_drag, double coefficient_duration, 
 			String path1, String path2, String path3, String path4) {
 		HashMap<Long, HashMap<Integer, Double>> stuno_video_preference = new HashMap<Long, HashMap<Integer, Double>>();
 		
-		HashMap<Long, HashMap<Integer, Double>> stuno_video_preferenceTimes = this.readPreference(path1);
-		HashMap<Long, HashMap<Integer, Double>> stuno_video_preferencePauseDrag = this.readPreference(path2);
-		HashMap<Long, HashMap<Integer, Double>> stuno_video_preferenceDuration = this.readPreference(path3);
+		HashMap<Long, HashMap<Integer, Double>> stuno_video_preferenceTimes = CalPreference.readPreference(path1);
+		HashMap<Long, HashMap<Integer, Double>> stuno_video_preferencePauseDrag = CalPreference.readPreference(path2);
+		HashMap<Long, HashMap<Integer, Double>> stuno_video_preferenceDuration = CalPreference.readPreference(path3);
 		
 		long stuno = 0;
 		HashMap<Integer, Double> video_preferenceTimes = null;
@@ -73,7 +70,7 @@ public class CalPreference {
 			stuno_video_preference.put(stuno, video_preference);
 		}
 		
-		this.storePreferenceTimes(stuno_video_preference, path4);
+		CalPreference.storePreferenceTimes(stuno_video_preference, path4);
 	}
 	
 	/**
@@ -81,7 +78,7 @@ public class CalPreference {
 	 * @param path
 	 * @return
 	 */
-	private HashMap<Long, HashMap<Integer, Double>> readPreference(String path) {
+	private static HashMap<Long, HashMap<Integer, Double>> readPreference(String path) {
 		HashMap<Long, HashMap<Integer, Double>> stuno_video_preference = new HashMap<Long, HashMap<Integer, Double>>();
 		
 		long stuno = 0;
@@ -131,7 +128,7 @@ public class CalPreference {
 	 * @param stuno_video_preference
 	 * @param path
 	 */
-	private void storePreferenceTimes(HashMap<Long, HashMap<Integer, Double>> stuno_video_preference, String path) {
+	private static void storePreferenceTimes(HashMap<Long, HashMap<Integer, Double>> stuno_video_preference, String path) {
 		StringBuilder preferenceSb = new StringBuilder();
 		
 		int stuno_sequence = 0;
@@ -156,7 +153,7 @@ public class CalPreference {
 			}
 		}
 		
-		StoreStringIntoFile.storeString(preferenceSb.toString(), path, false);
+		StoreStringIntoFile.storeString(preferenceSb.toString(), path);
 	}
 	
 }
