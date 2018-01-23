@@ -11,6 +11,14 @@ public class LearningLog {
 	private String title;
 	private int tlen;
 	
+	public LearningLog(long stuno, int oper, String title, int tlen) {
+		super();
+		this.stuno = stuno;
+		this.oper = oper;
+		this.title = title;
+		this.tlen = tlen;
+	}
+	
 	public long getStuno() {
 		return stuno;
 	}
@@ -25,13 +33,5 @@ public class LearningLog {
 
 	public int getTlen() {
 		return tlen;
-	}
-
-	public LearningLog(long stuno, int oper, String title, int tlen) {
-		super();
-		this.stuno = stuno;
-		this.oper = oper;
-		this.title = title;
-		this.tlen = tlen;
 	}
 }
