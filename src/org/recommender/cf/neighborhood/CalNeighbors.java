@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 
-import org.recommender.utility.GetProperty;
+import org.recommender.utility.PropertyHelper;
 import org.recommender.utility.StoreStringIntoFile;
 
 /**
@@ -15,17 +15,14 @@ import org.recommender.utility.StoreStringIntoFile;
 */
 public class CalNeighbors {
 
-	public static void main(String[] args) {		
+	/*public static void main(String[] args) {		
 		String similarity_path = GetProperty.getPropertyByName("SIMILARITY_PATH");
 		int user_num = Integer.parseInt(GetProperty.getPropertyByName("USER_NUM"));
 		double[][] similarityMatrix = CalNeighbors.readSimilarityMatrix(similarity_path, user_num);
 		
 		int parameter_k = Integer.parseInt(GetProperty.getPropertyByName("PARAMETER_K"));
 		int[][] neighborsMatrix = CalNeighbors.calKNeighbors(user_num, parameter_k, similarityMatrix);
-		
-		String path = GetProperty.getPropertyByName("K_NEIGHBORS_PATH");
-		CalNeighbors.storeNeighborsMatrix(neighborsMatrix, path);
-	}
+	}*/
 	
     /**
      * Calculate all users' K-Neighbors.
@@ -40,6 +37,9 @@ public class CalNeighbors {
 		for (int i = 0; i < user_num; i++) {
 			neighborsMatrix[i] = new FindKNeighbors().genNeighbors(parameter_k, i + 1, similarityMatrix[i]);
 		}
+		
+		String path = PropertyHelper.getProperty("K_NEIGHBORS_PATH");
+		CalNeighbors.storeNeighborsMatrix(neighborsMatrix, path);
 		
 		return neighborsMatrix;
 	}
