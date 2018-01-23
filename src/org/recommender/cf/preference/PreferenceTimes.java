@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.recommender.data.LearningLog;
-import org.recommender.utility.GetProperty;
+import org.recommender.utility.PropertyHelper;
 import org.recommender.utility.MySQLHelper;
 import org.recommender.utility.StoreStringIntoFile;
 
@@ -19,9 +19,8 @@ import org.recommender.utility.StoreStringIntoFile;
 * Title   : PreferenceTimes
 * Description : (stuno, (video, times))
 */
-public class PreferenceTimes implements Preference {
-	public static void main(String[] args) {
-
+public class PreferenceTimes {
+	/*public static void main(String[] args) {
 		Connection conn = MySQLHelper.getConn();
 		
 		String tableName = "my_cs_log_stulearns_4th";
@@ -29,12 +28,10 @@ public class PreferenceTimes implements Preference {
 		
 		String path1 = GetProperty.getPropertyByName("PREFERENCE_TIMES_DETAIL_PATH");
 		String path2 = GetProperty.getPropertyByName("PREFERENCE_TIMES_PATH");
-		PreferenceTimes preferenceTimes = new PreferenceTimes();
-		preferenceTimes.calPreference(conn, sql, path1, path2);
-	}
+		PreferenceTimes.calPreference(conn, sql, path1, path2);
+	}*/
 	
-	@Override
-	public void calPreference(Connection conn, String sql, String path1, String path2) {
+	public static void calPreference(Connection conn, String sql, String path1, String path2) {
 		Map<Long, HashMap<Integer, Integer>> stuno_video_times = new HashMap<Long, HashMap<Integer, Integer>>();
 		
 		HashMap<String, Integer> videos = VideoSequenceDur.readVideo(conn); // (课程视频名, 课程视频次序)
@@ -80,11 +77,10 @@ public class PreferenceTimes implements Preference {
 		
 		System.out.println(stuno_video_times.size() + " 个学生");
 		
-		// store the result
-		this.storePreferenceTimes(stuno_video_times, path1, path2);
+		PreferenceTimes.storePreferenceTimes(stuno_video_times, path1, path2);
 	}
 	
-	public void calPreference(Connection conn, List<LearningLog> logs, String path1, String path2) {
+	public static void calPreference(Connection conn, List<LearningLog> logs, String path1, String path2) {
 		Map<Long, HashMap<Integer, Integer>> stuno_video_times = new HashMap<Long, HashMap<Integer, Integer>>();
 		
 		HashMap<String, Integer> videos = VideoSequenceDur.readVideo(conn); // (课程视频名, 课程视频次序)
@@ -95,34 +91,35 @@ public class PreferenceTimes implements Preference {
 		HashMap<Integer, Integer> video_times = null;
 		
 		for(LearningLog aLearningLog : logs) {
-			stuno = aLearningLog.getStuno();
-			title = aLearningLog.getTitle();
-			
-			video_sequence = videos.get(title);
-			if (video_sequence != null) {
-				if (stuno_video_times.containsKey(stuno)) { // old student
-					video_times = stuno_video_times.get(stuno);				
-					if (video_times.containsKey(video_sequence)) { // watched video
-						video_times.put(video_sequence, video_times.get(video_sequence) + 1);
-					} else { // new video
+			if (aLearningLog.getOper() == 76) {
+				stuno = aLearningLog.getStuno();
+				title = aLearningLog.getTitle();
+				
+				video_sequence = videos.get(title);
+				if (video_sequence != null) {
+					if (stuno_video_times.containsKey(stuno)) { // old student
+						video_times = stuno_video_times.get(stuno);				
+						if (video_times.containsKey(video_sequence)) { // watched video
+							video_times.put(video_sequence, video_times.get(video_sequence) + 1);
+						} else { // new video
+							video_times.put(video_sequence, 1);
+						}
+					} else { // new student with new video
+						video_times = new HashMap<Integer, Integer>();
 						video_times.put(video_sequence, 1);
+						
+						stuno_video_times.put(stuno, video_times);
 					}
-				} else { // new student with new video
-					video_times = new HashMap<Integer, Integer>();
-					video_times.put(video_sequence, 1);
-					
-					stuno_video_times.put(stuno, video_times);
 				}
 			}
 		}
 		
 		System.out.println(stuno_video_times.size() + " 个学生");
 		
-		// store the result
-		this.storePreferenceTimes(stuno_video_times, path1, path2);
+		PreferenceTimes.storePreferenceTimes(stuno_video_times, path1, path2);
 	}
 	
-	private void storePreferenceTimes(Map<Long, HashMap<Integer, Integer>> stuno_video_times, String path1, String path2) {
+	public static void storePreferenceTimes(Map<Long, HashMap<Integer, Integer>> stuno_video_times, String path1, String path2) {
 		
 		StringBuilder preference_detail = new StringBuilder();
 		StringBuilder preference = new StringBuilder();
@@ -172,8 +169,8 @@ public class PreferenceTimes implements Preference {
 		}
 		
 		// stroe into file
-		StoreStringIntoFile.storeString(preference_detail.toString(), path1, true);
-		StoreStringIntoFile.storeString(preference.toString(), path2, true);
+		StoreStringIntoFile.storeString(preference_detail.toString(), path1);
+		StoreStringIntoFile.storeString(preference.toString(), path2);
 	}
 	
 }

@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.recommender.data.LearningLog;
-import org.recommender.utility.GetProperty;
+import org.recommender.utility.PropertyHelper;
 import org.recommender.utility.MySQLHelper;
 import org.recommender.utility.StoreStringIntoFile;
 
@@ -19,8 +19,8 @@ import org.recommender.utility.StoreStringIntoFile;
 * Title   : PreferenceDuration
 * Description : 
 */
-public class PreferenceDuration implements Preference {	
-	public static void main(String[] args) {
+public class PreferenceDuration {	
+	/*public static void main(String[] args) {
 
 		Connection conn = MySQLHelper.getConn();
 		
@@ -29,12 +29,17 @@ public class PreferenceDuration implements Preference {
 		
 		String path1 = GetProperty.getPropertyByName("PREFERENCE_DURATION_DETAIL_PATH");
 		String path2 = GetProperty.getPropertyByName("PREFERENCE_DURATION_PATH");
-		PreferenceDuration preferenceDuration = new PreferenceDuration();
-		preferenceDuration.calPreference(conn, sql, path1, path2);
-	}
+		PreferenceDuration.calPreference(conn, sql, path1, path2);
+	}*/
 	
-	@Override
-	public void calPreference(Connection conn, String sql, String path1, String path2) {
+	/**
+	 * 从数据库中读取日志数据
+	 * @param conn
+	 * @param sql
+	 * @param path1
+	 * @param path2
+	 */
+	public static void calPreference(Connection conn, String sql, String path1, String path2) {
 		Map<Long, HashMap<Integer, Integer>> stuno_video_times = new HashMap<Long, HashMap<Integer, Integer>>();
 		Map<Long, HashMap<Integer, Integer>> stuno_video_totalTlen = new HashMap<Long, HashMap<Integer, Integer>>();
 		
@@ -82,14 +87,14 @@ public class PreferenceDuration implements Preference {
 			e.printStackTrace();
 		}
 		
-		System.out.println(stuno_video_times.size() + " 个学生"); // 654 个学生
+		System.out.println(stuno_video_times.size() + " 个学生");
 		
 		Map<Integer, Integer> video_dur = VideoSequenceDur.getVideosDur(conn);
 		
-		this.storePreferenceDuration(stuno_video_times, stuno_video_totalTlen, video_dur, path1, path2); // store the result
+		PreferenceDuration.storePreferenceDuration(stuno_video_times, stuno_video_totalTlen, video_dur, path1, path2); // store the result
 	}
 	
-	public void calPreference(Connection conn, List<LearningLog> logs, String path1, String path2) {
+	public static void calPreference(Connection conn, List<LearningLog> logs, String path1, String path2) {
 		Map<Long, HashMap<Integer, Integer>> stuno_video_times = new HashMap<Long, HashMap<Integer, Integer>>();
 		Map<Long, HashMap<Integer, Integer>> stuno_video_totalTlen = new HashMap<Long, HashMap<Integer, Integer>>();
 		
@@ -102,32 +107,34 @@ public class PreferenceDuration implements Preference {
 		HashMap<Integer, Integer> video_times = null;
 		HashMap<Integer, Integer> video_totalTlen = null;
 		for(LearningLog aLearningLog : logs) {
-			stuno = aLearningLog.getStuno();
-			title = aLearningLog.getTitle();
-			tlen = aLearningLog.getTlen();
-			
-			video_sequence = videos.get(title);
-			if (video_sequence != null) {
-				if (stuno_video_times.containsKey(stuno)) { // old student
-					video_times = stuno_video_times.get(stuno);
-					video_totalTlen = stuno_video_totalTlen.get(stuno);
-					
-					if (video_times.containsKey(video_sequence)) { // watched video
-						video_times.put(video_sequence, video_times.get(video_sequence) + 1);
-						video_totalTlen.put(video_sequence, video_totalTlen.get(video_sequence) + tlen);
-					} else { // new video
-						video_times.put(video_sequence, 1);					
+			if (aLearningLog.getOper() == 76) {
+				stuno = aLearningLog.getStuno();
+				title = aLearningLog.getTitle();
+				tlen = aLearningLog.getTlen();
+				
+				video_sequence = videos.get(title);
+				if (video_sequence != null) {
+					if (stuno_video_times.containsKey(stuno)) { // old student
+						video_times = stuno_video_times.get(stuno);
+						video_totalTlen = stuno_video_totalTlen.get(stuno);
+						
+						if (video_times.containsKey(video_sequence)) { // watched video
+							video_times.put(video_sequence, video_times.get(video_sequence) + 1);
+							video_totalTlen.put(video_sequence, video_totalTlen.get(video_sequence) + tlen);
+						} else { // new video
+							video_times.put(video_sequence, 1);					
+							video_totalTlen.put(video_sequence, tlen);
+						}
+					} else { // new student with new video
+						video_times = new HashMap<Integer, Integer>();
+						video_times.put(video_sequence, 1);
+						
+						video_totalTlen = new HashMap<Integer, Integer>();
 						video_totalTlen.put(video_sequence, tlen);
+						
+						stuno_video_times.put(stuno, video_times);
+						stuno_video_totalTlen.put(stuno, video_totalTlen);
 					}
-				} else { // new student with new video
-					video_times = new HashMap<Integer, Integer>();
-					video_times.put(video_sequence, 1);
-					
-					video_totalTlen = new HashMap<Integer, Integer>();
-					video_totalTlen.put(video_sequence, tlen);
-					
-					stuno_video_times.put(stuno, video_times);
-					stuno_video_totalTlen.put(stuno, video_totalTlen);
 				}
 			}
 		}
@@ -136,16 +143,10 @@ public class PreferenceDuration implements Preference {
 		
 		Map<Integer, Integer> video_dur = VideoSequenceDur.getVideosDur(conn);
 		
-		this.storePreferenceDuration(stuno_video_times, stuno_video_totalTlen, video_dur, path1, path2); // store the result
+		PreferenceDuration.storePreferenceDuration(stuno_video_times, stuno_video_totalTlen, video_dur, path1, path2); // store the result
 	}
 	
-	/**
-	 * 
-	 * @param stuno_video_times
-	 * @param stuno_video_totalTlen
-	 * @param videos_dur
-	 */
-	private void storePreferenceDuration(Map<Long, HashMap<Integer, Integer>> stuno_video_times, Map<Long, HashMap<Integer, Integer>> stuno_video_totalTlen, 
+	private static void storePreferenceDuration(Map<Long, HashMap<Integer, Integer>> stuno_video_times, Map<Long, HashMap<Integer, Integer>> stuno_video_totalTlen, 
 			Map<Integer, Integer> video_dur, String path1, String path2) {
 		
 		StringBuilder preference_detail = new StringBuilder();
@@ -194,8 +195,7 @@ public class PreferenceDuration implements Preference {
 		}
 		
 		// stroe into file
-		StoreStringIntoFile.storeString(preference_detail.toString(), path1, true);
-		StoreStringIntoFile.storeString(preference.toString(), path2, true);
+		StoreStringIntoFile.storeString(preference_detail.toString(), path1);
+		StoreStringIntoFile.storeString(preference.toString(), path2);
 	}
-	
 }
