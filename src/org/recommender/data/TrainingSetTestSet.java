@@ -118,13 +118,13 @@ public class TrainingSetTestSet {
 	}
 	
 	/**
-	 * 处理测试集，只保留训练集中包含的学习者及其记录
+	 * 挑选，只保留训练集中包含的学习者及其记录
 	 * @param testSet
 	 * @param stunos_sequences
 	 * @param videos_sequences
 	 * @return
 	 */
-	public static HashMap<Integer, HashSet<Integer>> processTestSet(List<LearningLog> testSet, HashMap<Long, Integer> stunos_sequences, 
+	public static HashMap<Integer, HashSet<Integer>> selectTestSet(List<LearningLog> testSet, HashMap<Long, Integer> stunos_sequences, 
 			HashMap<String, Integer> videos_sequences) {
 		HashMap<Integer, HashSet<Integer>> stuno_videos = new HashMap<Integer, HashSet<Integer>>();
 		
@@ -163,7 +163,7 @@ public class TrainingSetTestSet {
 	 * @param stunos_sequences
 	 * @return
 	 */
-    public static HashMap<Integer, HashSet<Integer>> readStunoVideos(Connection conn, HashMap<Long, Integer> stunos_sequences) {
+    private static HashMap<Integer, HashSet<Integer>> readStunoVideos(Connection conn, HashMap<Long, Integer> stunos_sequences) {
 		String tableName = "my_maozedong_sequence";
 		String sql = "SELECT stuno, sequence FROM " + tableName 
 				+ " WHERE rtime BETWEEN \"2015-07-01 00:00:00\" AND \"2015-08-31 23:59:59\"";
