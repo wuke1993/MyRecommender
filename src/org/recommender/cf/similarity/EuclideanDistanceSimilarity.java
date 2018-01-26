@@ -6,7 +6,7 @@ package org.recommender.cf.similarity;
 * Title   : EuclideanDistanceSimilarity
 * Description : TODO 未实现
 */
-public class EuclideanDistanceSimilarity implements UserSimilarity {
+public class EuclideanDistanceSimilarity implements Similarity {
 	@Override
 	public double calSimilarity(double[] listA, double[] listB) {
 		return 0;

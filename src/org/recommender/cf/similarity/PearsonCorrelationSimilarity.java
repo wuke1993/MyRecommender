@@ -6,7 +6,7 @@ package org.recommender.cf.similarity;
 * Title   : PearsonCorrelationSimilarity
 * Description : https://en.wikipedia.org/wiki/Pearson_correlation_coefficient
 */
-public class PearsonCorrelationSimilarity implements UserSimilarity {
+public class PearsonCorrelationSimilarity implements Similarity {
 
 	public static final double DOUBLE_ZERO = 0.0000000001;
 	
