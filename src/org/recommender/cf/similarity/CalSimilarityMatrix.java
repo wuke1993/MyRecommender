@@ -1,8 +1,8 @@
 package org.recommender.cf.similarity;
 
-import org.recommender.cf.preference.GenPreferenceMatrix;
+import java.util.HashMap;
+
 import org.recommender.cf.similarity.forum.ForumCorrelation;
-import org.recommender.cf.similarity.forum.ForumPostAnswerCorrelation;
 import org.recommender.utility.PropertyHelper;
 import org.recommender.utility.StoreStringIntoFile;
 
@@ -10,28 +10,9 @@ import org.recommender.utility.StoreStringIntoFile;
 * @author : wuke
 * @date   : 20170611 00:38:27
 * Title   : CalSimilarityMatrix
-* Description : Calculate similarity matrix by calling CalTwoUsersSimilarity.calTwoUsersSimilarity().
+* Description : 计算用户相似度矩阵
 */
-public class CalSimilarityMatrix {
-
-	/*public static void main(String[] args) {
-		// read users' preference
-		String preference_path = GetProperty.getPropertyByName("PREFERENCE_PATH");
-		int user_num = Integer.parseInt(GetProperty.getPropertyByName("USER_NUM"));
-		int item_num = Integer.parseInt(GetProperty.getPropertyByName("ITEM_NUM"));
-		
-		double[][] preferenceMatrix = GenPreferenceMatrix.genPreferenceMatrix(preference_path, user_num, item_num);
-		System.out.println(preferenceMatrix.length + " students, " + preferenceMatrix[0].length + " videos!");
-		
-		// calculate users' similarity
-		double[][] similarityMatrix = CalSimilarityMatrix.calSimilarityMatrix(preferenceMatrix, user_num);
-		
-		// store users' similarity
-		String similarity_path = GetProperty.getPropertyByName("SIMILARITY_PATH");
-		CalSimilarityMatrix.storeSimilarityMatrix(similarityMatrix, similarity_path);
-		
-	}*/
-	
+public class CalSimilarityMatrix {	
 	/**
 	 * Calculate Similarity Matrix.
 	 * @param preferenceMatrix
@@ -41,7 +22,6 @@ public class CalSimilarityMatrix {
 	public static double[][] calSimilarityMatrix(double[][] preferenceMatrix, int user_num) {
 		double[][] similarityMatrix = new double[user_num][user_num];
 		
-		try {
 		for (int i = 0; i < user_num; i++) {
 			for (int j = 0; j < user_num; j++) {
 				if (i == j) {
@@ -51,8 +31,25 @@ public class CalSimilarityMatrix {
 				}
 			}
 		}
-		} catch (Exception e) {
-			e.printStackTrace();
+		
+		String similarity_path = PropertyHelper.getProperty("SIMILARITY_PATH");
+		CalSimilarityMatrix.storeSimilarityMatrix(similarityMatrix, similarity_path);
+		
+		return similarityMatrix;
+	}
+	
+	public static double[][] calSimilarityMatrix(double[][] preferenceMatrix, int user_num, HashMap<Integer, Integer> stuno_coursewareTimes) {
+		double[][] similarityMatrix = new double[user_num][user_num];
+		
+		for (int i = 0; i < user_num; i++) {
+			for (int j = 0; j < user_num; j++) {
+				if (i == j) {
+					similarityMatrix[i][j] = 1;
+				} else {
+					similarityMatrix[i][j] = CalSimilarityMatrix.calTwoUsersSimilarity(preferenceMatrix[i], preferenceMatrix[j], stuno_coursewareTimes, 
+							i + 1, j + 1);
+				}
+			}
 		}
 		
 		String similarity_path = PropertyHelper.getProperty("SIMILARITY_PATH");
@@ -80,11 +77,49 @@ public class CalSimilarityMatrix {
 	}
 	
 	/**
+	 * pearson_similarity + weight_courseware * coursewareTimes_similarity
+	 * @param preferenceArrX
+	 * @param preferenceArrY
+	 * @param stuno_coursewareTimes
+	 * @param stuno_sequence_x 从1开始
+	 * @param stuno_sequence_y 从1开始
+	 * @return
+	 */
+	public static double calTwoUsersSimilarity(double[] preferenceArrX, double[] preferenceArrY, HashMap<Integer, Integer> stuno_coursewareTimes, 
+			int stuno_sequence_x, int stuno_sequence_y) {
+		double similarity = 0.0;
+		double weight_courseware = Double.parseDouble(PropertyHelper.getProperty("WEIGHT_COURSEWARE"));
+		
+		// 皮尔逊相关系数
+		double pearson_similarity = 0.0;
+		
+		PearsonCorrelationSimilarity pearsonCS = new PearsonCorrelationSimilarity();
+		pearson_similarity = pearsonCS.calSimilarity(preferenceArrX, preferenceArrY);
+		
+		// 观看课件次数的相似性 (0, 1]
+		int stuno_x_coursewareTimes = 0;
+		int stuno_y_coursewareTimes = 0;
+		double coursewareTimes_similarity = 0.0;
+		
+		stuno_x_coursewareTimes = stuno_coursewareTimes.get(stuno_sequence_x);
+		stuno_y_coursewareTimes = stuno_coursewareTimes.get(stuno_sequence_y);
+		if (stuno_x_coursewareTimes == stuno_y_coursewareTimes) {
+			coursewareTimes_similarity = 1;
+		} else {
+			coursewareTimes_similarity = 1 / (Math.abs(stuno_x_coursewareTimes - stuno_y_coursewareTimes));
+		}
+		
+		similarity = pearson_similarity +  weight_courseware * coursewareTimes_similarity;
+		
+		return similarity;
+	}
+	
+	/**
 	 * TODO pearson_similarity +  weight_forum_correlation * forum_correlation
 	 * @param preferenceArrX
 	 * @param preferenceArrY
-	 * @param stuno_sequence_x
-	 * @param stuno_sequence_y
+	 * @param stuno_sequence_x  从1开始
+	 * @param stuno_sequence_y  从1开始
 	 * @param weight_forum_correlation
 	 * @return
 	 */
@@ -97,9 +132,7 @@ public class CalSimilarityMatrix {
 		PearsonCorrelationSimilarity pearsonCS = new PearsonCorrelationSimilarity();
 		pearson_similarity = pearsonCS.calSimilarity(preferenceArrX, preferenceArrY);
 		
-		similarity = pearson_similarity;
-		ForumCorrelation forumCorrelation = new ForumPostAnswerCorrelation();
-		forum_correlation = forumCorrelation.calForumCorrelation(stuno_sequence_x, stuno_sequence_y);
+		forum_correlation = ForumCorrelation.calForumCorrelation(stuno_sequence_x, stuno_sequence_y);
 		
 		similarity = pearson_similarity +  weight_forum_correlation * forum_correlation;
 		
