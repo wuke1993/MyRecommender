@@ -16,20 +16,7 @@ import org.recommender.utility.StoreStringIntoFile;
 * Title   : CalPreference
 * Description : TODO 组合三种评分。线性加权 & 向量 
 */
-public class CalPreference {
-
-	/*public static void main(String[] args) {		
-		double coefficient_times = Double.parseDouble(GetProperty.getPropertyByName("WEIGHT_TIMES"));
-		double coefficient_pause_drag = Double.parseDouble(GetProperty.getPropertyByName("WEIGHT_PAUSE_DRAG"));
-		double coefficient_duration = Double.parseDouble(GetProperty.getPropertyByName("WEIGHT_DURATION"));
-		
-		String path1 = GetProperty.getPropertyByName("PREFERENCE_TIMES_PATH");
-		String path2 = GetProperty.getPropertyByName("PREFERENCE_PAUSE_DRAG_PATH");
-		String path3 = GetProperty.getPropertyByName("PREFERENCE_DURATION_PATH");
-		String path4 = GetProperty.getPropertyByName("PREFERENCE_PATH");
-		CalPreference.calPreference(coefficient_times, coefficient_pause_drag, coefficient_duration, path1, path2, path3, path4);
-	}*/
-	
+public class CalPreference {	
 	public static void calPreference(double coefficient_times, double coefficient_pause_drag, double coefficient_duration, 
 			String path1, String path2, String path3, String path4) {
 		HashMap<Long, HashMap<Integer, Double>> stuno_video_preference = new HashMap<Long, HashMap<Integer, Double>>();
@@ -155,5 +142,16 @@ public class CalPreference {
 		
 		StoreStringIntoFile.storeString(preferenceSb.toString(), path);
 	}
-	
+
+	public static void test() {		
+		double coefficient_times = Double.parseDouble(PropertyHelper.getProperty("WEIGHT_TIMES"));
+		double coefficient_pause_drag = Double.parseDouble(PropertyHelper.getProperty("WEIGHT_PAUSE_DRAG"));
+		double coefficient_duration = Double.parseDouble(PropertyHelper.getProperty("WEIGHT_DURATION"));
+		
+		String path1 = PropertyHelper.getProperty("PREFERENCE_TIMES_PATH");
+		String path2 = PropertyHelper.getProperty("PREFERENCE_PAUSE_DRAG_PATH");
+		String path3 = PropertyHelper.getProperty("PREFERENCE_DURATION_PATH");
+		String path4 = PropertyHelper.getProperty("PREFERENCE_PATH");
+		CalPreference.calPreference(coefficient_times, coefficient_pause_drag, coefficient_duration, path1, path2, path3, path4);
+	}
 }
