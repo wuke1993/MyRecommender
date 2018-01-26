@@ -6,36 +6,14 @@ import java.util.List;
 import java.util.Map;
 
 import org.recommender.data.LearningLog;
-import org.recommender.utility.PropertyHelper;
-import org.recommender.utility.MySQLHelper;
 
 /**
 * @author : wuke
 * @date   : 20170608 16:57:11
 * Title   : PreferenceDrag
-* Description : 
+* Description : 学习者（暂停+拖动）某个视频的总次数/该视频被单个学习者（暂停+拖动）的最大次数
 */
 public class PreferencePauseDrag {
-	public static void test() {
-		Connection conn = MySQLHelper.getConn();
-		String tableName = "my_cs_log_stulearns_4th";
-		String sql = "SELECT stuno, title FROM " + tableName + " WHERE platform = 2 AND oper = 78 OR oper = 79"; // 385 个学生
-
-		String path1 = PropertyHelper.getProperty("PREFERENCE_PAUSE_DRAG_DETAIL_PATH");
-		String path2 = PropertyHelper.getProperty("PREFERENCE_PAUSE_DRAG_PATH");
-		PreferencePauseDrag.calPreference(conn, sql, path1, path2);
-	}
-	
-	/**
-	 * 从数据库中读取日志数据
-	 * @param conn
-	 * @param sql
-	 * @param path1
-	 * @param path2
-	 */
-	public static void calPreference(Connection conn, String sql, String path1, String path2) {
-		PreferenceTimes.calPreference(conn, sql, path1, path2);
-	}
 	
 	public static void calPreference(Connection conn, List<LearningLog> logs, String path1, String path2) {
         Map<Long, HashMap<Integer, Integer>> stuno_video_pause_drag = new HashMap<Long, HashMap<Integer, Integer>>();
@@ -73,6 +51,17 @@ public class PreferencePauseDrag {
 		
 		System.out.println(stuno_video_pause_drag.size() + " 个学生");
 		
-		PreferenceTimes.storePreferenceTimes(stuno_video_pause_drag, path1, path2);
+		PreferenceTimes.storePreferenceTimes(stuno_video_pause_drag, path1, path2); // 存储
+	}
+	
+	/**
+	 * 弃用。从数据库中读取日志数据
+	 * @param conn
+	 * @param sql
+	 * @param path1
+	 * @param path2
+	 */
+	public static void calPreference(Connection conn, String sql, String path1, String path2) {
+		PreferenceTimes.calPreference(conn, sql, path1, path2);
 	}
 }
