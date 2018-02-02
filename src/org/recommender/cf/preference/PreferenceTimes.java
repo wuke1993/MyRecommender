@@ -20,21 +20,20 @@ import org.recommender.utility.StoreStringIntoFile;
 * Description : 学习者学习某个视频的总次数/该视频被单个学习者学习的最大次数
 */
 public class PreferenceTimes {
-	
-	public static void calPreference(Connection conn, String sql, String path1, String path2) {
+	public static void calPreference(Connection conn, List<LearningLog> logs, String path1, String path2) {
 		Map<Long, HashMap<Integer, Integer>> stuno_video_times = new HashMap<Long, HashMap<Integer, Integer>>();
 		
 		HashMap<String, Integer> videos = VideoSequenceDur.readVideo(conn); // (课程视频名, 课程视频次序)
 
-		ResultSet rs = MySQLHelper.getResultSet(conn, sql);
 		long stuno = 0;
 		String title = "";
 		Integer video_sequence = 0;
 		HashMap<Integer, Integer> video_times = null;
-		try {
-			while (rs.next()) {
-				stuno = rs.getLong(1);
-				title = rs.getString(2);
+		
+		for(LearningLog aLearningLog : logs) {
+			if (aLearningLog.getOper() == 76) {
+				stuno = aLearningLog.getStuno();
+				title = aLearningLog.getTitle();
 				
 				video_sequence = videos.get(title);
 				if (video_sequence != null) {
@@ -53,23 +52,13 @@ public class PreferenceTimes {
 					}
 				}
 			}
-			
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				rs.close();
-				conn.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
 		}
 		
-		System.out.println(stuno_video_times.size() + " 个学生");
+		//System.out.println(stuno_video_times.size() + " 个学生");
 		
 		PreferenceTimes.storePreferenceTimes(stuno_video_times, path1, path2);
 	}
-	
+		
 	public static void storePreferenceTimes(Map<Long, HashMap<Integer, Integer>> stuno_video_times, String path1, String path2) {
 		
 		StringBuilder preference_detail = new StringBuilder();
@@ -138,20 +127,20 @@ public class PreferenceTimes {
 	/**
 	 * 弃用。从数据库中读取日志数据
 	 */
-	public static void calPreference(Connection conn, List<LearningLog> logs, String path1, String path2) {
+	public static void calPreference(Connection conn, String sql, String path1, String path2) {
 		Map<Long, HashMap<Integer, Integer>> stuno_video_times = new HashMap<Long, HashMap<Integer, Integer>>();
 		
 		HashMap<String, Integer> videos = VideoSequenceDur.readVideo(conn); // (课程视频名, 课程视频次序)
 
+		ResultSet rs = MySQLHelper.getResultSet(conn, sql);
 		long stuno = 0;
 		String title = "";
 		Integer video_sequence = 0;
 		HashMap<Integer, Integer> video_times = null;
-		
-		for(LearningLog aLearningLog : logs) {
-			if (aLearningLog.getOper() == 76) {
-				stuno = aLearningLog.getStuno();
-				title = aLearningLog.getTitle();
+		try {
+			while (rs.next()) {
+				stuno = rs.getLong(1);
+				title = rs.getString(2);
 				
 				video_sequence = videos.get(title);
 				if (video_sequence != null) {
@@ -170,9 +159,19 @@ public class PreferenceTimes {
 					}
 				}
 			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				rs.close();
+				conn.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
 		}
 		
-		System.out.println(stuno_video_times.size() + " 个学生");
+		//System.out.println(stuno_video_times.size() + " 个学生");
 		
 		PreferenceTimes.storePreferenceTimes(stuno_video_times, path1, path2);
 	}
