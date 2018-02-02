@@ -10,7 +10,7 @@ public class FindKNeighbors implements FindNeighbors {
 
 	@Override
 	public int[] genNeighbors(double parameter, int stuno_sequence, double[] similarityArr) {
-		similarityArr[stuno_sequence - 1] = Double.MIN_VALUE;
+		similarityArr[stuno_sequence - 1] = -Double.MAX_VALUE;
 		
 		int k = (int) parameter;
 		int[] neighbors = new int[k];
@@ -18,7 +18,7 @@ public class FindKNeighbors implements FindNeighbors {
 		for(int i = 0; i < k; i++) {
 			neighbors[i] = FindKNeighbors.findMaxIndex(similarityArr);
 			
-			similarityArr[neighbors[i]] = Double.MIN_VALUE;
+			similarityArr[neighbors[i]] = -Double.MAX_VALUE;
 		}
 		
 		return neighbors;
