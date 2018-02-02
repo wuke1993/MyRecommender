@@ -14,7 +14,7 @@ import org.recommender.utility.StoreStringIntoFile;
 */
 public class CalSimilarityMatrix {	
 	/**
-	 * Calculate Similarity Matrix.
+	 * Calculate Similarity Matrix. PearsonCorrelationSimilarity
 	 * @param preferenceMatrix
 	 * @param user_num
 	 * @return similarityMatrix double[][]
@@ -38,7 +38,17 @@ public class CalSimilarityMatrix {
 		return similarityMatrix;
 	}
 	
-	public static double[][] calSimilarityMatrix(double[][] preferenceMatrix, int user_num, HashMap<Integer, Integer> stuno_coursewareTimes) {
+	/**
+	 * Calculate Similarity Matrix. (pearson_similarity + coursewareTimes_similarity)
+	 * @param preferenceMatrix
+	 * @param user_num
+	 * @param stuno_coursewareTimes
+	 * @param weight_pearson
+	 * @param weight_courseware
+	 * @return
+	 */
+	public static double[][] calSimilarityMatrix(double[][] preferenceMatrix, int user_num, HashMap<Integer, Integer> stuno_coursewareTimes,
+			double weight_pearson, double weight_courseware) {
 		double[][] similarityMatrix = new double[user_num][user_num];
 		
 		for (int i = 0; i < user_num; i++) {
@@ -47,7 +57,7 @@ public class CalSimilarityMatrix {
 					similarityMatrix[i][j] = 1;
 				} else {
 					similarityMatrix[i][j] = CalSimilarityMatrix.calTwoUsersSimilarity(preferenceMatrix[i], preferenceMatrix[j], stuno_coursewareTimes, 
-							i + 1, j + 1);
+							i + 1, j + 1, weight_pearson, weight_courseware);
 				}
 			}
 		}
@@ -77,7 +87,7 @@ public class CalSimilarityMatrix {
 	}
 	
 	/**
-	 * pearson_similarity + weight_courseware * coursewareTimes_similarity
+	 * pearson_similarity + coursewareTimes_similarity
 	 * @param preferenceArrX
 	 * @param preferenceArrY
 	 * @param stuno_coursewareTimes
@@ -86,17 +96,14 @@ public class CalSimilarityMatrix {
 	 * @return
 	 */
 	public static double calTwoUsersSimilarity(double[] preferenceArrX, double[] preferenceArrY, HashMap<Integer, Integer> stuno_coursewareTimes, 
-			int stuno_sequence_x, int stuno_sequence_y) {
+			int stuno_sequence_x, int stuno_sequence_y, double weight_pearson, double weight_courseware) {
 		double similarity = 0.0;
-		double weight_courseware = Double.parseDouble(PropertyHelper.getProperty("WEIGHT_COURSEWARE"));
-		
-		// 皮尔逊相关系数
 		double pearson_similarity = 0.0;
 		
 		PearsonCorrelationSimilarity pearsonCS = new PearsonCorrelationSimilarity();
 		pearson_similarity = pearsonCS.calSimilarity(preferenceArrX, preferenceArrY);
 		
-		// 观看课件次数的相似性 (0, 1]
+		// 观看课件次数的相似性 (-1, 1]
 		int stuno_x_coursewareTimes = 0;
 		int stuno_y_coursewareTimes = 0;
 		double coursewareTimes_similarity = 0.0;
@@ -105,26 +112,29 @@ public class CalSimilarityMatrix {
 		stuno_y_coursewareTimes = stuno_coursewareTimes.get(stuno_sequence_y);
 		if (stuno_x_coursewareTimes == stuno_y_coursewareTimes) {
 			coursewareTimes_similarity = 1;
+		} else if (Math.abs(stuno_x_coursewareTimes - stuno_y_coursewareTimes) >= 112) {
+			coursewareTimes_similarity = 1 / (Math.abs(stuno_x_coursewareTimes - stuno_y_coursewareTimes)) - 1;
 		} else {
 			coursewareTimes_similarity = 1 / (Math.abs(stuno_x_coursewareTimes - stuno_y_coursewareTimes));
 		}
 		
-		similarity = pearson_similarity +  weight_courseware * coursewareTimes_similarity;
+		similarity = weight_pearson * pearson_similarity +  weight_courseware * coursewareTimes_similarity;
 		
 		return similarity;
 	}
 	
 	/**
-	 * TODO pearson_similarity +  weight_forum_correlation * forum_correlation
+	 * TODO pearson_similarity + forum_correlation
 	 * @param preferenceArrX
 	 * @param preferenceArrY
 	 * @param stuno_sequence_x  从1开始
 	 * @param stuno_sequence_y  从1开始
+	 * @param weight_pearson
 	 * @param weight_forum_correlation
 	 * @return
 	 */
 	public static double calTwoUsersSimilarity(double[] preferenceArrX, double[] preferenceArrY, int stuno_sequence_x, int stuno_sequence_y, 
-			double weight_forum_correlation) {
+			double weight_pearson, double weight_forum_correlation) {
 		double similarity = 0.0;
 		double pearson_similarity = 0.0;
 		double forum_correlation = 0.0;
@@ -134,7 +144,7 @@ public class CalSimilarityMatrix {
 		
 		forum_correlation = ForumCorrelation.calForumCorrelation(stuno_sequence_x, stuno_sequence_y);
 		
-		similarity = pearson_similarity +  weight_forum_correlation * forum_correlation;
+		similarity = weight_pearson * pearson_similarity +  weight_forum_correlation * forum_correlation;
 		
 		return similarity;
 	}
