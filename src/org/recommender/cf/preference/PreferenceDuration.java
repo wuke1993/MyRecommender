@@ -17,7 +17,7 @@ import org.recommender.utility.StoreStringIntoFile;
 * @author : wuke
 * @date   : 20170608 16:58:07
 * Title   : PreferenceDuration
-* Description : 学习者学习某个视频的平均时长/视频自身的时长
+* Description : 
 */
 public class PreferenceDuration {	
 	/**
@@ -72,16 +72,74 @@ public class PreferenceDuration {
 			}
 		}
 		
-		System.out.println(stuno_video_times.size() + " 个学生");
+		//System.out.println(stuno_video_times.size() + " 个学生");
 		
 		Map<Integer, Integer> video_dur = VideoSequenceDur.getVideosDur(conn);
 		
+		PreferenceDuration.storePreferenceDuration2(stuno_video_totalTlen, video_dur, path1, path2);
 		//PreferenceDuration.storePreferenceDuration(stuno_video_times, stuno_video_totalTlen, path1, path2);
-		PreferenceDuration.storePreferenceDuration(stuno_video_times, stuno_video_totalTlen, video_dur, path1, path2);
+		//PreferenceDuration.storePreferenceDuration(stuno_video_times, stuno_video_totalTlen, video_dur, path1, path2);
 	}
 	
 	/**
-	 * 学习者学习某视频的平均时长 / 该视频自身时长
+	 * 学习者学习某视频的总时长 / 该视频自身时长。大于 3，赋值为 3，并进行规范化 [0,1]
+	 * @param stuno_video_totalTlen
+	 * @param video_dur 视频时长
+	 * @param path1
+	 * @param path2
+	 */
+	private static void storePreferenceDuration2(Map<Long, HashMap<Integer, Integer>> stuno_video_totalTlen, Map<Integer, Integer> video_dur, 
+			String path1, String path2) {
+		
+		StringBuilder preference_detail = new StringBuilder();
+		StringBuilder preference = new StringBuilder();
+		
+		long stuno = 0;
+		HashMap<Integer, Integer> video_totalTlen = null;
+		for (Entry<Long, HashMap<Integer, Integer>> entry : stuno_video_totalTlen.entrySet()) {
+			stuno = entry.getKey();
+			video_totalTlen = entry.getValue();
+			
+			int sequence = 0;
+			double totalTlen = 0;
+			double dur = 0;
+			double preferenceDuration = 0;
+			for (Entry<Integer, Integer> entry2 : video_totalTlen.entrySet()) {
+				sequence = entry2.getKey();
+				totalTlen = entry2.getValue();
+					
+				dur = video_dur.get(sequence);
+				
+				preferenceDuration = totalTlen / dur;
+				
+				if (preferenceDuration > 3.0) {
+					preferenceDuration = 3.0;
+				}
+				
+				preferenceDuration /= 3;
+				
+				// preference_detail
+				preference_detail.append(stuno);
+				preference_detail.append("," + sequence);
+				preference_detail.append("," + totalTlen);
+				preference_detail.append("," + dur);
+				preference_detail.append("\n");
+				
+				// preference
+				preference.append(stuno);
+				preference.append("," + sequence);
+				preference.append("," + preferenceDuration);
+				preference.append("\n");
+			}
+		}
+		
+		// stroe into file
+		StoreStringIntoFile.storeString(preference_detail.toString(), path1);
+		StoreStringIntoFile.storeString(preference.toString(), path2);
+	}
+	
+	/**
+	 * (学习者学习某视频的总时长 / 次数) / 该视频自身时长
 	 * @param stuno_video_times
 	 * @param stuno_video_totalTlen
 	 * @param video_dur 视频时长
@@ -210,7 +268,7 @@ public class PreferenceDuration {
 		StoreStringIntoFile.storeString(preference.toString(), path2);
 	}
 	
-	public static void test() {
+	/*public static void test() {
 		Connection conn = MySQLHelper.getConn();
 		
 		String tableName = "my_cs_log_stulearns_4th";
@@ -219,7 +277,7 @@ public class PreferenceDuration {
 		String path1 = PropertyHelper.getProperty("PREFERENCE_DURATION_DETAIL_PATH");
 		String path2 = PropertyHelper.getProperty("PREFERENCE_DURATION_PATH");
 		PreferenceDuration.calPreference(conn, sql, path1, path2);
-	}
+	}*/
 	
 	/**
 	 * 弃用。从数据库中读取日志数据
