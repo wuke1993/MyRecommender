@@ -7,16 +7,25 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
-import org.recommender.utility.PropertyHelper;
 import org.recommender.utility.StoreStringIntoFile;
 
 /**
 * @author : wuke
 * @date   : 20170609 20:37:23
 * Title   : CalPreference
-* Description : TODO 组合三种评分。线性加权 & 向量 
+* Description : 线性加权组合三种评分
 */
-public class CalPreference {	
+public class CalPreference {
+	/**
+	 * 线性加权组合三种评分
+	 * @param coefficient_times
+	 * @param coefficient_pause_drag
+	 * @param coefficient_duration
+	 * @param path1
+	 * @param path2
+	 * @param path3
+	 * @param path4
+	 */
 	public static void calPreference(double coefficient_times, double coefficient_pause_drag, double coefficient_duration, 
 			String path1, String path2, String path3, String path4) {
 		HashMap<Long, HashMap<Integer, Double>> stuno_video_preference = new HashMap<Long, HashMap<Integer, Double>>();
@@ -57,7 +66,7 @@ public class CalPreference {
 			stuno_video_preference.put(stuno, video_preference);
 		}
 		
-		CalPreference.storePreferenceTimes(stuno_video_preference, path4);
+		CalPreference.storePreference(stuno_video_preference, path4);
 	}
 	
 	/**
@@ -115,7 +124,7 @@ public class CalPreference {
 	 * @param stuno_video_preference
 	 * @param path
 	 */
-	private static void storePreferenceTimes(HashMap<Long, HashMap<Integer, Double>> stuno_video_preference, String path) {
+	private static void storePreference(HashMap<Long, HashMap<Integer, Double>> stuno_video_preference, String path) {
 		StringBuilder preferenceSb = new StringBuilder();
 		
 		int stuno_sequence = 0;
@@ -143,7 +152,7 @@ public class CalPreference {
 		StoreStringIntoFile.storeString(preferenceSb.toString(), path);
 	}
 
-	public static void test() {		
+	/*public static void test() {		
 		double coefficient_times = Double.parseDouble(PropertyHelper.getProperty("WEIGHT_TIMES"));
 		double coefficient_pause_drag = Double.parseDouble(PropertyHelper.getProperty("WEIGHT_PAUSE_DRAG"));
 		double coefficient_duration = Double.parseDouble(PropertyHelper.getProperty("WEIGHT_DURATION"));
@@ -153,5 +162,5 @@ public class CalPreference {
 		String path3 = PropertyHelper.getProperty("PREFERENCE_DURATION_PATH");
 		String path4 = PropertyHelper.getProperty("PREFERENCE_PATH");
 		CalPreference.calPreference(coefficient_times, coefficient_pause_drag, coefficient_duration, path1, path2, path3, path4);
-	}
+	}*/
 }
