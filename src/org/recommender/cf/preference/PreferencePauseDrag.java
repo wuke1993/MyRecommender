@@ -49,7 +49,7 @@ public class PreferencePauseDrag {
 			}
 		}
 		
-		System.out.println(stuno_video_pause_drag.size() + " 个学生");
+		//System.out.println(stuno_video_pause_drag.size() + " 个学生");
 		
 		PreferenceTimes.storePreferenceTimes(stuno_video_pause_drag, path1, path2); // 存储
 	}
