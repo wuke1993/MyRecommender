@@ -26,12 +26,13 @@ import org.recommender.utility.MySQLHelper;
 /**
 * @author : wuke
 * @date   : 20170611 02:51:30
-* Title   : InitCFRecommender
+* Title   : CFRecommender
 * Description : 
 */
 public class CFRecommender {
 	public static double[][] PREFERENCE_MATRIX = null;
 	public static int[][] NEIGHBORS_MATRIX = null;
+	public static ArrayList<HashMap<Integer, Double>> REC_ARRAY = null;
 	
 	public static void main(String[] args) {
 		Connection conn = MySQLHelper.getConn();
@@ -51,12 +52,21 @@ public class CFRecommender {
         
 		double weight_pearson = Double.parseDouble(PropertyHelper.getProperty("WEIGHT_PEARSON"));
 		double weight_courseware = Double.parseDouble(PropertyHelper.getProperty("WEIGHT_COURSEWARE"));
-        CFRecommender.initPreferenceNeighborsMatrix(conn, weight_pearson, weight_courseware);
+        CFRecommender.initPreferenceNeighborsMatrix(conn, 9, 1);
         
-        for (int i = 50; i <= 50; i++) {
-        	for (int j = 10; j <= 10; j++) {
-        		CFRecommender.measureRec(conn, i, j, testSet);
-        		System.out.println("***********");
+        /*int neighbors_num = Integer.parseInt(PropertyHelper.getProperty("PARAMETER_K"));
+        int recommendation_num = Integer.parseInt(PropertyHelper.getProperty("PARAMETER_N"));
+        CFRecommender.genRecommendation(neighbors_num, recommendation_num);*/
+        
+        CFRecommender.measure(conn, testSet);
+	}
+	
+	public static void measure(Connection conn, List<LearningLog> testSet) {
+		for (int i = 50; i <= 50; i++) { // 邻近用户个数
+        	for (int j = 1; j <= 5; j++) { // 推荐个数
+        		CFRecommender.genRecommendation(i, j);
+        		
+        		CFRecommender.measureRec(conn, testSet);
         	}
         	System.out.println("==========================");
         }
@@ -84,26 +94,6 @@ public class CFRecommender {
 	
 	/**
 	 * 评分矩阵 & 邻近用户矩阵生成
-	 * PearsonCorrelationSimilarity
-	 */
-	public static void initPreferenceNeighborsMatrix(Connection conn) {
-		// 生成评分矩阵
-		int user_num = Integer.parseInt(PropertyHelper.getProperty("USER_NUM"));
-		int item_num = Integer.parseInt(PropertyHelper.getProperty("ITEM_NUM"));
-		
-		String preference_path = PropertyHelper.getProperty("PREFERENCE_PATH");
-		CFRecommender.PREFERENCE_MATRIX = GenPreferenceMatrix.genPreferenceMatrix(preference_path, user_num, item_num);
-		
-		// 计算相似度矩阵
-		double[][] similarityMatrix = CalSimilarityMatrix.calSimilarityMatrix(CFRecommender.PREFERENCE_MATRIX, user_num);
-		
-		// 生成邻近用户
-		int neighbors_num = Integer.parseInt(PropertyHelper.getProperty("PARAMETER_K")); // 10个
-		CFRecommender.NEIGHBORS_MATRIX = CalNeighbors.calKNeighbors(user_num, neighbors_num, similarityMatrix);
-	}
-	
-	/**
-	 * 评分矩阵 & 邻近用户矩阵生成
 	 * pearson_similarity + coursewareTimes_similarity
 	 */
 	public static void initPreferenceNeighborsMatrix(Connection conn, double weight_pearson, double weight_courseware) {
@@ -125,28 +115,50 @@ public class CFRecommender {
 	}
 	
 	/**
-	 * 生成推荐列表 & 算法性能评价
-	 * @param conn
+	 * 评分矩阵 & 邻近用户矩阵生成
+	 * PearsonCorrelationSimilarity
+	 */
+	public static void initPreferenceNeighborsMatrix(Connection conn) {
+		// 生成评分矩阵
+		int user_num = Integer.parseInt(PropertyHelper.getProperty("USER_NUM"));
+		int item_num = Integer.parseInt(PropertyHelper.getProperty("ITEM_NUM"));
+		
+		String preference_path = PropertyHelper.getProperty("PREFERENCE_PATH");
+		CFRecommender.PREFERENCE_MATRIX = GenPreferenceMatrix.genPreferenceMatrix(preference_path, user_num, item_num);
+		
+		// 计算相似度矩阵
+		double[][] similarityMatrix = CalSimilarityMatrix.calSimilarityMatrix(CFRecommender.PREFERENCE_MATRIX, user_num);
+		
+		// 生成邻近用户
+		int neighbors_num = Integer.parseInt(PropertyHelper.getProperty("PARAMETER_K")); // 10个
+		CFRecommender.NEIGHBORS_MATRIX = CalNeighbors.calKNeighbors(user_num, neighbors_num, similarityMatrix);
+	}
+	
+	/**
+	 * 生成推荐列表
 	 * @param neighbors_num
 	 * @param recommendation_num
-	 * @param testSet
 	 */
-	public static double[] measureRec(Connection conn, int neighbors_num, int recommendation_num, List<LearningLog> testSet) {
-		// 生成推荐列表
-		ArrayList<HashMap<Integer, Double>> recArr = GenRecommendations.genRecommendationForAll(CFRecommender.PREFERENCE_MATRIX, 
+	public static void genRecommendation(int neighbors_num, int recommendation_num) {
+		CFRecommender.REC_ARRAY = GenRecommendations.genRecommendationForAll(CFRecommender.PREFERENCE_MATRIX, 
 				CFRecommender.NEIGHBORS_MATRIX, neighbors_num, recommendation_num);
-		
-		String rec_path = PropertyHelper.getProperty("REC_PATH");
-		GenRecommendations.storeRecommendations(recArr, rec_path);
-		
-		// 算法评价
+	}
+	
+	/**
+	 *  算法性能评价
+	 * @param conn
+	 * @param testSet
+	 * @return
+	 */
+	public static double[] measureRec(Connection conn, List<LearningLog> testSet) {
 		HashMap<Long, Integer> stunos_sequences = TrainingSetTestSet.getStunoSequence(PropertyHelper.getProperty("PREFERENCE_PATH"));
 		HashMap<String, Integer> videos_sequences = VideoSequenceDur.readVideo(conn);
+		
 		HashMap<Integer, HashSet<Integer>> testSet_stuno_videos = TrainingSetTestSet.selectTestSet(testSet, stunos_sequences, videos_sequences);
 		
-		double[] accuracy_recall = Measuring.calAccuracyRecallRate(recArr, testSet_stuno_videos);
+		double[] accuracy_recall = Measuring.calAccuracyRecallRate(CFRecommender.REC_ARRAY, testSet_stuno_videos);
 		
-		//System.out.println(accuracy_recall[0] + "  " + accuracy_recall[1]);
+		System.out.println(accuracy_recall[0] + "  " + accuracy_recall[1]);
 		
 		return accuracy_recall;
 	}
