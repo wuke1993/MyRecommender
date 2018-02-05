@@ -2,7 +2,6 @@ package org.recommender.cf.rec;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map.Entry;
 
 import org.recommender.utility.PropertyHelper;
 import org.recommender.utility.StoreStringIntoFile;
@@ -18,8 +17,9 @@ public class GenRecommendations {
 	 * 
 	 * @param preferenceMatrix
 	 * @param neighborsMatrix
+	 * @param neighbors_num
 	 * @param recommendation_num
-	 * @return
+	 * @return recArr
 	 */
 	public static ArrayList<HashMap<Integer, Double>> genRecommendationForAll(double[][] preferenceMatrix, 
 			int[][] neighborsMatrix, int neighbors_num, int recommendation_num) {
@@ -31,6 +31,9 @@ public class GenRecommendations {
 			recArr.add(GenRecommendations.genRecommendationForOne(preferenceMatrix, neighborsMatrix, i, neighbors_num, recommendation_num));
 		}
 		
+		String rec_path = PropertyHelper.getProperty("REC_PATH");
+		GenRecommendations.storeRecommendations(recArr, rec_path);
+		
 		return recArr;
 	}
 	
@@ -40,7 +43,7 @@ public class GenRecommendations {
 	 * @param neighborsMatrix
 	 * @param user_sequence
 	 * @param recommendation_num
-	 * @return
+	 * @return rec (vedio_sequence, preference)
 	 */
 	public static HashMap<Integer, Double> genRecommendationForOne(double[][] preferenceMatrix, int[][] neighborsMatrix, 
 			int user_sequence, int neighbors_num, int recommendation_num) {
@@ -85,11 +88,6 @@ public class GenRecommendations {
 		return rec;
 	}
 	
-	/**
-	 * 
-	 * @param candidate_rec
-	 * @return
-	 */
 	private static int findIndexOfMax(HashMap<Integer, Double> candidate_rec) {
 		
 		int index = 9999;
@@ -112,11 +110,6 @@ public class GenRecommendations {
         }
 	}      
 	
-	/**
-	 * 
-	 * @param recArr
-	 * @param path
-	 */
 	public static void storeRecommendations(ArrayList<HashMap<Integer, Double>> recArr, String path) {
 		StringBuilder sb = new StringBuilder();
 		
