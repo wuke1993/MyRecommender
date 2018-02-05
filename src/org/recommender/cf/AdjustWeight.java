@@ -39,9 +39,11 @@ public class AdjustWeight {
         int l = 1;
         CFRecommender.initPreference(conn, trainSet, i, j, l);
 		CFRecommender.initPreferenceNeighborsMatrix(conn);
-		for (int n = 3; n <= 9; n++) {
-			for (int k = 2; k <= 5; k++) {
-				accuracy_recall = CFRecommender.measureRec(conn, n, k, testSet);
+		for (int k = 3; k <= 9; k++) {
+			for (int n = 2; n <= 5; n++) {
+			    CFRecommender.genRecommendation(k, n);
+			
+				accuracy_recall = CFRecommender.measureRec(conn, testSet);
 				
 				accuracy += accuracy_recall[0];
 				recall += accuracy_recall[1];
@@ -63,9 +65,11 @@ public class AdjustWeight {
         			
         			CFRecommender.initPreferenceNeighborsMatrix(conn);
         			
-        			for (int n = 3; n <= 9; n++) {
-        				for (int k = 2; k <= 5; k++) {
-        					accuracy_recall = CFRecommender.measureRec(conn, n, k, testSet);
+        			for (int k = 3; k <= 9; k++) {
+        				for (int n = 2; n <= 5; n++) {
+        					CFRecommender.genRecommendation(k, n);
+        					
+        					accuracy_recall = CFRecommender.measureRec(conn, testSet);
         					
         					accuracy += accuracy_recall[0];
         					recall += accuracy_recall[1];
@@ -84,21 +88,20 @@ public class AdjustWeight {
         double accuracy = 0.0;
         double recall = 0.0;
         
-        /*double i = 0;
-        double j = 1;
-		CFRecommender.initPreferenceNeighborsMatrix(conn, i, j);
-		for (int n = 3; n <= 20; n++) {
-			for (int k = 2; k <= 5; k++) {
-				accuracy_recall = CFRecommender.measureRec(conn, n, k, testSet);
+		CFRecommender.initPreferenceNeighborsMatrix(conn, 0, 1);
+		for (int k = 3; k <= 20; k++) {
+			for (int n = 2; n <= 5; n++) {
+				CFRecommender.genRecommendation(k, n);
+				accuracy_recall = CFRecommender.measureRec(conn, testSet);
 				
 				accuracy += accuracy_recall[0];
 				recall += accuracy_recall[1];
 			}
 		}
-		System.out.println(i + "," + j);
-		System.out.println(accuracy + "," + recall);*/
+		System.out.println(1 + "," + 0);
+		System.out.println(accuracy + "," + recall);
         
-        for (int i = 1; i < 10; i++) {
+        /*for (int i = 1; i < 10; i++) {
         	int j = 10 - i;
         	
 			accuracy = 0.0;
@@ -106,9 +109,10 @@ public class AdjustWeight {
 			
 			CFRecommender.initPreferenceNeighborsMatrix(conn, i, j);
 			
-			for (int n = 3; n <= 20; n++) {
-				for (int k = 2; k <= 5; k++) {
-					accuracy_recall = CFRecommender.measureRec(conn, n, k, testSet);
+			for (int k = 3; k <= 20; k++) {
+				for (int n = 2; n <= 5; n++) {
+					CFRecommender.genRecommendation(k, n);
+					accuracy_recall = CFRecommender.measureRec(conn, testSet);
 					
 					accuracy += accuracy_recall[0];
 					recall += accuracy_recall[1];
@@ -117,6 +121,6 @@ public class AdjustWeight {
 			
 			System.out.println(i + "," + j);
 			System.out.println(accuracy + "," + recall);
-        }
+        }*/
 	}
 }
