@@ -29,7 +29,8 @@ public class TrainingSetTestSet {
 		List<LearningLog> logs = new ArrayList<LearningLog>();
 		
 		String tableName = "my_cs_log_stulearns_4th";
-		String sql = "SELECT stuno, oper, title, tlen FROM " + tableName + " WHERE platform = 2 AND oper IN (76, 78, 79) ORDER BY stuno, rtime";
+		String sql = "SELECT stuno, oper, title, tlen FROM " + tableName + 
+				" WHERE 1 = 1 AND platform = 2 AND oper IN (76, 78, 79) ORDER BY stuno, rtime";
 		
 		ResultSet rs = null;
 		long stuno = 0L;
@@ -86,7 +87,7 @@ public class TrainingSetTestSet {
 	}
 	
 	/**
-	 * 从文件（计算评分阶段所生成的文件）中读取学习者的序号
+	 * 从文件（计算评分阶段所生成的文件）中读取学习者的序号，TODO 从 1 开始的 
 	 * @param path
 	 * @return
 	 */
