@@ -19,7 +19,7 @@ public class StoreStringIntoFile {
 			fw = new FileWriter(file, false);
 			fw.write(str);
 			
-			System.out.println("Successfully store file in " + path);
+			//System.out.println("Successfully store file in " + path);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
@@ -39,7 +39,7 @@ public class StoreStringIntoFile {
 			fw = new FileWriter(file, append);
 			fw.write(str);
 			
-			System.out.println("Successfully store file in " + path);
+			//System.out.println("Successfully store file in " + path);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
