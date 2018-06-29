@@ -14,7 +14,6 @@ import org.recommender.data.LearningLog;
 * Description : 学习者（暂停+拖动）某个视频的总次数/该视频被单个学习者（暂停+拖动）的最大次数
 */
 public class PreferencePauseDrag {
-	
 	public static void calPreference(Connection conn, List<LearningLog> logs, String path1, String path2) {
         Map<Long, HashMap<Integer, Integer>> stuno_video_pause_drag = new HashMap<Long, HashMap<Integer, Integer>>();
 		
@@ -26,7 +25,7 @@ public class PreferencePauseDrag {
 		HashMap<Integer, Integer> video_times = null;
 		
 		for(LearningLog aLearningLog : logs) {
-			if (aLearningLog.getOper() != 76) {
+			if (aLearningLog.getOper() != 76) { // 78 & 79
 				stuno = aLearningLog.getStuno();
 				title = aLearningLog.getTitle();
 				
