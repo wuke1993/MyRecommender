@@ -27,9 +27,9 @@ public class PreferenceDuration {
 	 * @param path1
 	 * @param path2
 	 */
-	public static void calPreference(Connection conn, List<LearningLog> logs, String path1, String path2) {
-		Map<Long, HashMap<Integer, Integer>> stuno_video_times = new HashMap<Long, HashMap<Integer, Integer>>();
-		Map<Long, HashMap<Integer, Integer>> stuno_video_totalTlen = new HashMap<Long, HashMap<Integer, Integer>>();
+	public static HashMap<Long, HashMap<Integer, Integer>> calPreference(Connection conn, List<LearningLog> logs, String path1, String path2) {
+		HashMap<Long, HashMap<Integer, Integer>> stuno_video_times = new HashMap<Long, HashMap<Integer, Integer>>();
+		HashMap<Long, HashMap<Integer, Integer>> stuno_video_totalTlen = new HashMap<Long, HashMap<Integer, Integer>>();
 		
 		HashMap<String, Integer> videos = VideoSequenceDur.readVideo(conn); // (课程视频名, 课程视频次序)
 				
@@ -44,9 +44,9 @@ public class PreferenceDuration {
 				stuno = aLearningLog.getStuno();
 				title = aLearningLog.getTitle();
 				tlen = aLearningLog.getTlen();
-				
+					
 				video_sequence = videos.get(title);
-				if (video_sequence != null) {
+				if (video_sequence != null) { // 可剔除错误日志
 					if (stuno_video_times.containsKey(stuno)) { // old student
 						video_times = stuno_video_times.get(stuno);
 						video_totalTlen = stuno_video_totalTlen.get(stuno);
@@ -79,6 +79,8 @@ public class PreferenceDuration {
 		PreferenceDuration.storePreferenceDuration2(stuno_video_totalTlen, video_dur, path1, path2);
 		//PreferenceDuration.storePreferenceDuration(stuno_video_times, stuno_video_totalTlen, path1, path2);
 		//PreferenceDuration.storePreferenceDuration(stuno_video_times, stuno_video_totalTlen, video_dur, path1, path2);
+		
+		return stuno_video_totalTlen;
 	}
 	
 	/**
@@ -138,8 +140,20 @@ public class PreferenceDuration {
 		StoreStringIntoFile.storeString(preference.toString(), path2);
 	}
 	
+	
+	/*public static void test() {
+		Connection conn = MySQLHelper.getConn();
+		
+		String tableName = "my_cs_log_stulearns_4th";
+		String sql = "SELECT stuno, title, tlen FROM " + tableName + " WHERE platform = 2 AND oper = 76";
+		
+		String path1 = PropertyHelper.getProperty("PREFERENCE_DURATION_DETAIL_PATH");
+		String path2 = PropertyHelper.getProperty("PREFERENCE_DURATION_PATH");
+		PreferenceDuration.calPreference(conn, sql, path1, path2);
+	}*/
+	
 	/**
-	 * (学习者学习某视频的总时长 / 次数) / 该视频自身时长
+	 * 弃用。(学习者学习某视频的总时长 / 次数) / 该视频自身时长
 	 * @param stuno_video_times
 	 * @param stuno_video_totalTlen
 	 * @param video_dur 视频时长
@@ -195,7 +209,7 @@ public class PreferenceDuration {
 	}
 	
 	/**
-	 * 学习者学习某视频的平均时长 / 该视频被学习的最大平均时长
+	 * 弃用。学习者学习某视频的平均时长 / 该视频被学习的最大平均时长
 	 * @param stuno_video_times
 	 * @param stuno_video_totalTlen
 	 * @param path1
@@ -268,19 +282,12 @@ public class PreferenceDuration {
 		StoreStringIntoFile.storeString(preference.toString(), path2);
 	}
 	
-	/*public static void test() {
-		Connection conn = MySQLHelper.getConn();
-		
-		String tableName = "my_cs_log_stulearns_4th";
-		String sql = "SELECT stuno, title, tlen FROM " + tableName + " WHERE platform = 2 AND oper = 76";
-		
-		String path1 = PropertyHelper.getProperty("PREFERENCE_DURATION_DETAIL_PATH");
-		String path2 = PropertyHelper.getProperty("PREFERENCE_DURATION_PATH");
-		PreferenceDuration.calPreference(conn, sql, path1, path2);
-	}*/
-	
 	/**
 	 * 弃用。从数据库中读取日志数据
+	 * @param conn
+	 * @param sql
+	 * @param path1
+	 * @param path2
 	 */
 	public static void calPreference(Connection conn, String sql, String path1, String path2) {
 		Map<Long, HashMap<Integer, Integer>> stuno_video_times = new HashMap<Long, HashMap<Integer, Integer>>();
