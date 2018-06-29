@@ -17,11 +17,11 @@ import org.recommender.utility.StoreStringIntoFile;
 * @author : wuke
 * @date   : 20170608 16:55:08
 * Title   : PreferenceTimes
-* Description : 学习者学习某个视频的总次数/该视频被单个学习者学习的最大次数
+* Description : 学习者学习某个视频的总次数 / 该视频被单个学习者学习的最大次数
 */
 public class PreferenceTimes {
-	public static void calPreference(Connection conn, List<LearningLog> logs, String path1, String path2) {
-		Map<Long, HashMap<Integer, Integer>> stuno_video_times = new HashMap<Long, HashMap<Integer, Integer>>();
+	public static HashMap<Long, HashMap<Integer, Integer>> calPreference(Connection conn, List<LearningLog> logs, String path1, String path2) {
+		HashMap<Long, HashMap<Integer, Integer>> stuno_video_times = new HashMap<Long, HashMap<Integer, Integer>>();
 		
 		HashMap<String, Integer> videos = VideoSequenceDur.readVideo(conn); // (课程视频名, 课程视频次序)
 
@@ -57,6 +57,8 @@ public class PreferenceTimes {
 		//System.out.println(stuno_video_times.size() + " 个学生");
 		
 		PreferenceTimes.storePreferenceTimes(stuno_video_times, path1, path2);
+		
+		return stuno_video_times;
 	}
 		
 	public static void storePreferenceTimes(Map<Long, HashMap<Integer, Integer>> stuno_video_times, String path1, String path2) {
