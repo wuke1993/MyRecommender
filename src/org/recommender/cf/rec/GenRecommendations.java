@@ -38,7 +38,7 @@ public class GenRecommendations {
 	}
 	
 	/**
-	 * user_sequence, start from 1
+	 * user_sequence, vedio_sequence start from 1
 	 * @param preferenceMatrix
 	 * @param neighborsMatrix
 	 * @param user_sequence
@@ -70,7 +70,7 @@ public class GenRecommendations {
 				}
 				tem_preferences /= k_neighbors_preferences.length;
 				
-				candidate_rec.put(i + 1, tem_preferences);
+				candidate_rec.put(i + 1, tem_preferences); // vedio_sequence, start from 1
 			} else { // TODO 已看过的还要不要推荐
 				candidate_rec.put(i + 1, own_preferences[i]);
 			}
@@ -82,7 +82,8 @@ public class GenRecommendations {
 			index = GenRecommendations.findIndexOfMax(candidate_rec);
 			rec.put(index, candidate_rec.get(index));
 			
-			candidate_rec.put(index, Double.MIN_VALUE);
+			// candidate_rec.put(index, Double.MIN_VALUE);
+			candidate_rec.put(index, -Double.MAX_VALUE);
 		}
 		
 		return rec;
@@ -91,7 +92,8 @@ public class GenRecommendations {
 	private static int findIndexOfMax(HashMap<Integer, Double> candidate_rec) {
 		
 		int index = 9999;
-		 double max = Double.MIN_VALUE;
+		// double max = Double.MIN_VALUE;
+		double max = -Double.MAX_VALUE;
 		for (int itme_sequence : candidate_rec.keySet()) {
 			if (max < candidate_rec.get(itme_sequence)) {
 				max = candidate_rec.get(itme_sequence);
