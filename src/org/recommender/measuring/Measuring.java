@@ -17,8 +17,8 @@ public class Measuring {
 		double accuracy = 0.0;
 		double recall = 0.0;
 		
-		HashMap<Integer, Double> hm = null;
-		HashSet<Integer> hs = null;
+		HashMap<Integer, Double> hm = null; // 给某用户推荐的视频列表
+		HashSet<Integer> hs = null; // 用户实际观看的列表
 		int[] arr1 = null;
         int[] arr2 = null;
 		for(Entry<Integer, HashSet<Integer>> entry : stuno_videos.entrySet()) {
