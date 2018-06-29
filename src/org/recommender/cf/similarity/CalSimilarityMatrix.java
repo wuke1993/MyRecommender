@@ -112,9 +112,12 @@ public class CalSimilarityMatrix {
 		stuno_y_coursewareTimes = stuno_coursewareTimes.get(stuno_sequence_y);
 		if (stuno_x_coursewareTimes == stuno_y_coursewareTimes) {
 			coursewareTimes_similarity = 1;
-		} else if (Math.abs(stuno_x_coursewareTimes - stuno_y_coursewareTimes) >= 112) {
-			coursewareTimes_similarity = 1 / (Math.abs(stuno_x_coursewareTimes - stuno_y_coursewareTimes)) - 1;
-		} else {
+		} else if (Math.abs(stuno_x_coursewareTimes - stuno_y_coursewareTimes) > 112) {
+			coursewareTimes_similarity = 1 / (Math.abs(stuno_x_coursewareTimes - stuno_y_coursewareTimes) - 112) - 1;
+			// coursewareTimes_similarity = -0.5;
+		} else if (Math.abs(stuno_x_coursewareTimes - stuno_y_coursewareTimes) == 112) {
+			coursewareTimes_similarity = 0;
+		}else {
 			coursewareTimes_similarity = 1 / (Math.abs(stuno_x_coursewareTimes - stuno_y_coursewareTimes));
 		}
 		
